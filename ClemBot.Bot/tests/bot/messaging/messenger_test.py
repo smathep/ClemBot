@@ -1,5 +1,5 @@
 import pytest
-import unittest
+from unittest import mock
 
 from bot.messaging.messenger import Messenger
 
@@ -70,7 +70,7 @@ class TestMessenger:
 
         class Foo:
             def __init__(self):
-                self.mock = unittest.mock.Mock()
+                self.mock = mock.Mock()
 
             async def async_mock(self, *args, **kwargs):
                 self.mock(*args, **kwargs)
@@ -87,8 +87,8 @@ class TestMessenger:
 
         class Foo:
             def __init__(self):
-                self.async_mock1 = unittest.mock.Mock()
-                self.async_mock2 = unittest.mock.Mock()
+                self.async_mock1 = mock.Mock()
+                self.async_mock2 = mock.Mock()
 
             async def async_1(self, *args, **kwargs):
                 self.async_mock1(*args, **kwargs)
@@ -110,7 +110,7 @@ class TestMessenger:
 
         class Foo:
             def __init__(self):
-                self.async_mock1 = unittest.mock.Mock()
+                self.async_mock1 = mock.Mock()
 
             async def async_1(self, *args, **kwargs):
                 self.async_mock1(*args, **kwargs)
@@ -128,7 +128,7 @@ class TestMessenger:
 
         class Foo:
             def __init__(self):
-                self.async_mock1 = unittest.mock.Mock()
+                self.async_mock1 = mock.Mock()
 
             async def async_1(self, *args, **kwargs):
                 self.async_mock1(*args, **kwargs)
@@ -147,7 +147,7 @@ class TestMessenger:
 
         class Foo:
             def __init__(self):
-                self.async_mock1 = unittest.mock.Mock()
+                self.async_mock1 = mock.Mock()
 
             async def async_1(self, *args, **kwargs):
                 self.async_mock1(*args, **kwargs)
