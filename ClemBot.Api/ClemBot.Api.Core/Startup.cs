@@ -29,8 +29,10 @@ namespace ClemBot.Api.Core
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "ClemBot.Api.Core", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "ClemBot.Api", Version = "1.0.0"});
             });
+            var connectionString = Environment.GetEnvironmentVariable("CLEMBOT_CONNECTION_STRING")
+                                       ?? Configuration["ClemBotConnectionString"];        
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,7 +42,7 @@ namespace ClemBot.Api.Core
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClemBot.Api.Core v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClemBot.Api 1.0.0"));
             }
 
             app.UseHttpsRedirection();
