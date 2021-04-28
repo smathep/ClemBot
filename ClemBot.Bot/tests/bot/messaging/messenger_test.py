@@ -1,5 +1,4 @@
 import pytest
-import asynctest
 import unittest
 
 from bot.messaging.messenger import Messenger

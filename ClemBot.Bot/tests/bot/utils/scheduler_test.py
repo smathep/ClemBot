@@ -1,4 +1,3 @@
-from attr import dataclass
 from discord.ext.commands.errors import BadArgument
 import pytest
 import asyncio

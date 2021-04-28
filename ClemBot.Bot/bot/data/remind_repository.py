@@ -1,6 +1,4 @@
-from sqlite3.dbapi2 import converters
 import aiosqlite
-from discord.ext.commands.converter import Converter
 
 from bot.data.base_repository import BaseRepository
 

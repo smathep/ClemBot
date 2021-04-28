@@ -1,8 +1,6 @@
-from discord import embeds
 from bot.consts import Colors
 import logging
 import discord
-from discord import colour
 
 import discord.ext.commands as commands
 

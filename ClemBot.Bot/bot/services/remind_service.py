@@ -1,6 +1,5 @@
 from bot.data.message_repository import MessageRepository
 from datetime import datetime
-from uuid import uuid4
 import logging
 
 import discord
