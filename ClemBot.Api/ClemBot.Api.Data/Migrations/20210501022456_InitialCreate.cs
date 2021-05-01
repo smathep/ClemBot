@@ -12,10 +12,10 @@ namespace ClemBot.Api.Data.Migrations
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:claims", "designated_channel_view,designated_channel_modify,custom_prefix_set,welcome_message_view,welcome_message_modify,tag_add,tag_delete,assignable_roles_add,assignable_roles_delete,delete_message,emote_add,claims_view,claims_modify,manage_class_add,moderation_warn,moderation_ban,moderation_mute,moderation_purge,moderation_infraction_view")
                 .Annotation("Npgsql:Enum:designated_channels", "message_log,moderation_log,startup_log,user_join_log,user_leave_log,starboard")
-                .Annotation("Npgsql:Enum:infractions", "ban,mute,warn");
+                .Annotation("Npgsql:Enum:infraction_type", "ban,mute,warn");
 
             migrationBuilder.CreateTable(
-                name: "Guild",
+                name: "Guilds",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -25,11 +25,11 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Guild", x => x.Id);
+                    table.PrimaryKey("PK_Guilds", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -38,11 +38,11 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Channel",
+                name: "Channels",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -52,17 +52,17 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Channel", x => x.Id);
+                    table.PrimaryKey("PK_Channels", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Channel_Guild_GuildId",
+                        name: "FK_Channels_Guilds_GuildId",
                         column: x => x.GuildId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomPrefix",
+                name: "CustomPrefixs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -72,32 +72,32 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CustomPrefix", x => x.Id);
+                    table.PrimaryKey("PK_CustomPrefixs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CustomPrefix_Guild_GuildId",
+                        name: "FK_CustomPrefixs_Guilds_GuildId",
                         column: x => x.GuildId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Role",
+                name: "Roles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    IsAssignable = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    IsAssignable = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     GuildId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Role", x => x.Id);
+                    table.PrimaryKey("PK_Roles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Role_Guild_GuildId",
+                        name: "FK_Roles_Guilds_GuildId",
                         column: x => x.GuildId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -113,26 +113,26 @@ namespace ClemBot.Api.Data.Migrations
                 {
                     table.PrimaryKey("PK_GuildUser", x => new { x.GuildsId, x.UsersId });
                     table.ForeignKey(
-                        name: "FK_GuildUser_Guild_GuildsId",
+                        name: "FK_GuildUser_Guilds_GuildsId",
                         column: x => x.GuildsId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GuildUser_User_UsersId",
+                        name: "FK_GuildUser_Users_UsersId",
                         column: x => x.UsersId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Infraction",
+                name: "Infractions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<Infractions>(type: "infractions", nullable: false),
+                    Type = table.Column<InfractionType>(type: "infraction_type", nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: true),
                     Duration = table.Column<int>(type: "integer", nullable: true),
@@ -143,29 +143,29 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Infraction", x => x.Id);
+                    table.PrimaryKey("PK_Infractions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Infraction_Guild_GuildId",
+                        name: "FK_Infractions_Guilds_GuildId",
                         column: x => x.GuildId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Infraction_User_AuthorId",
+                        name: "FK_Infractions_Users_AuthorId",
                         column: x => x.AuthorId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Infraction_User_SubjectId",
+                        name: "FK_Infractions_Users_SubjectId",
                         column: x => x.SubjectId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reminder",
+                name: "Reminders",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -177,23 +177,23 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Reminder", x => x.Id);
+                    table.PrimaryKey("PK_Reminders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Reminder_Guild_MessageId",
+                        name: "FK_Reminders_Guilds_MessageId",
                         column: x => x.MessageId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Reminder_User_UserId",
+                        name: "FK_Reminders_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tag",
+                name: "Tags",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -205,23 +205,23 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tag", x => x.Id);
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tag_Guild_GuildId",
+                        name: "FK_Tags_Guilds_GuildId",
                         column: x => x.GuildId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Tag_User_UserId",
+                        name: "FK_Tags_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "DesignatedChannelMapping",
+                name: "DesignatedChannelMappings",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -231,17 +231,17 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DesignatedChannelMapping", x => x.Id);
+                    table.PrimaryKey("PK_DesignatedChannelMappings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DesignatedChannelMapping_Channel_ChannelId",
+                        name: "FK_DesignatedChannelMappings_Channels_ChannelId",
                         column: x => x.ChannelId,
-                        principalTable: "Channel",
+                        principalTable: "Channels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Message",
+                name: "Messages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -254,29 +254,29 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Message", x => x.Id);
+                    table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Message_Channel_ChannelId",
+                        name: "FK_Messages_Channels_ChannelId",
                         column: x => x.ChannelId,
-                        principalTable: "Channel",
+                        principalTable: "Channels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Message_Guild_GuildId",
+                        name: "FK_Messages_Guilds_GuildId",
                         column: x => x.GuildId,
-                        principalTable: "Guild",
+                        principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Message_User_UserId",
+                        name: "FK_Messages_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ClaimsMapping",
+                name: "ClaimsMappings",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -286,17 +286,17 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ClaimsMapping", x => x.Id);
+                    table.PrimaryKey("PK_ClaimsMappings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ClaimsMapping_Role_RoleId",
+                        name: "FK_ClaimsMappings_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "Role",
+                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TagUse",
+                name: "TagUses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -308,45 +308,45 @@ namespace ClemBot.Api.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TagUse", x => x.Id);
+                    table.PrimaryKey("PK_TagUses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TagUse_Channel_ChannelId",
+                        name: "FK_TagUses_Channels_ChannelId",
                         column: x => x.ChannelId,
-                        principalTable: "Channel",
+                        principalTable: "Channels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TagUse_Tag_TagId",
+                        name: "FK_TagUses_Tags_TagId",
                         column: x => x.TagId,
-                        principalTable: "Tag",
+                        principalTable: "Tags",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TagUse_User_UserId",
+                        name: "FK_TagUses_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Channel_GuildId",
-                table: "Channel",
+                name: "IX_Channels_GuildId",
+                table: "Channels",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ClaimsMapping_RoleId",
-                table: "ClaimsMapping",
+                name: "IX_ClaimsMappings_RoleId",
+                table: "ClaimsMappings",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomPrefix_GuildId",
-                table: "CustomPrefix",
+                name: "IX_CustomPrefixs_GuildId",
+                table: "CustomPrefixs",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DesignatedChannelMapping_ChannelId",
-                table: "DesignatedChannelMapping",
+                name: "IX_DesignatedChannelMappings_ChannelId",
+                table: "DesignatedChannelMappings",
                 column: "ChannelId");
 
             migrationBuilder.CreateIndex(
@@ -355,116 +355,116 @@ namespace ClemBot.Api.Data.Migrations
                 column: "UsersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Infraction_AuthorId",
-                table: "Infraction",
+                name: "IX_Infractions_AuthorId",
+                table: "Infractions",
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Infraction_GuildId",
-                table: "Infraction",
+                name: "IX_Infractions_GuildId",
+                table: "Infractions",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Infraction_SubjectId",
-                table: "Infraction",
+                name: "IX_Infractions_SubjectId",
+                table: "Infractions",
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_ChannelId",
-                table: "Message",
+                name: "IX_Messages_ChannelId",
+                table: "Messages",
                 column: "ChannelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_GuildId",
-                table: "Message",
+                name: "IX_Messages_GuildId",
+                table: "Messages",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_UserId",
-                table: "Message",
+                name: "IX_Messages_UserId",
+                table: "Messages",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reminder_MessageId",
-                table: "Reminder",
+                name: "IX_Reminders_MessageId",
+                table: "Reminders",
                 column: "MessageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reminder_UserId",
-                table: "Reminder",
+                name: "IX_Reminders_UserId",
+                table: "Reminders",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Role_GuildId",
-                table: "Role",
+                name: "IX_Roles_GuildId",
+                table: "Roles",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tag_GuildId",
-                table: "Tag",
+                name: "IX_Tags_GuildId",
+                table: "Tags",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tag_UserId",
-                table: "Tag",
+                name: "IX_Tags_UserId",
+                table: "Tags",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TagUse_ChannelId",
-                table: "TagUse",
+                name: "IX_TagUses_ChannelId",
+                table: "TagUses",
                 column: "ChannelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TagUse_TagId",
-                table: "TagUse",
+                name: "IX_TagUses_TagId",
+                table: "TagUses",
                 column: "TagId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TagUse_UserId",
-                table: "TagUse",
+                name: "IX_TagUses_UserId",
+                table: "TagUses",
                 column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ClaimsMapping");
+                name: "ClaimsMappings");
 
             migrationBuilder.DropTable(
-                name: "CustomPrefix");
+                name: "CustomPrefixs");
 
             migrationBuilder.DropTable(
-                name: "DesignatedChannelMapping");
+                name: "DesignatedChannelMappings");
 
             migrationBuilder.DropTable(
                 name: "GuildUser");
 
             migrationBuilder.DropTable(
-                name: "Infraction");
+                name: "Infractions");
 
             migrationBuilder.DropTable(
-                name: "Message");
+                name: "Messages");
 
             migrationBuilder.DropTable(
-                name: "Reminder");
+                name: "Reminders");
 
             migrationBuilder.DropTable(
-                name: "TagUse");
+                name: "TagUses");
 
             migrationBuilder.DropTable(
-                name: "Role");
+                name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "Channel");
+                name: "Channels");
 
             migrationBuilder.DropTable(
-                name: "Tag");
+                name: "Tags");
 
             migrationBuilder.DropTable(
-                name: "Guild");
+                name: "Guilds");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "Users");
         }
     }
 }

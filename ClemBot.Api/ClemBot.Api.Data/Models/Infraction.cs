@@ -7,7 +7,7 @@ namespace ClemBot.Api.Data.Models
     {
         public int Id { get; set; }
         
-        public Infractions Type { get; set; }
+        public InfractionType Type { get; set; }
         
         public string? Reason { get; set; }
         

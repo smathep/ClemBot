@@ -18,7 +18,7 @@ namespace ClemBot.Api.Data.Migrations
             modelBuilder
                 .HasPostgresEnum(null, "claims", new[] { "designated_channel_view", "designated_channel_modify", "custom_prefix_set", "welcome_message_view", "welcome_message_modify", "tag_add", "tag_delete", "assignable_roles_add", "assignable_roles_delete", "delete_message", "emote_add", "claims_view", "claims_modify", "manage_class_add", "moderation_warn", "moderation_ban", "moderation_mute", "moderation_purge", "moderation_infraction_view" })
                 .HasPostgresEnum(null, "designated_channels", new[] { "message_log", "moderation_log", "startup_log", "user_join_log", "user_leave_log", "starboard" })
-                .HasPostgresEnum(null, "infractions", new[] { "ban", "mute", "warn" })
+                .HasPostgresEnum(null, "infraction_type", new[] { "ban", "mute", "warn" })
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -40,7 +40,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("Channel");
+                    b.ToTable("Channels");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.ClaimsMapping", b =>
@@ -60,7 +60,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("ClaimsMapping");
+                    b.ToTable("ClaimsMappings");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.CustomPrefix", b =>
@@ -80,7 +80,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("CustomPrefix");
+                    b.ToTable("CustomPrefixs");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.DesignatedChannelMapping", b =>
@@ -100,7 +100,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("ChannelId");
 
-                    b.ToTable("DesignatedChannelMapping");
+                    b.ToTable("DesignatedChannelMappings");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Guild", b =>
@@ -118,7 +118,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Guild");
+                    b.ToTable("Guilds");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Infraction", b =>
@@ -149,8 +149,8 @@ namespace ClemBot.Api.Data.Migrations
                     b.Property<DateTime>("Time")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<Infractions>("Type")
-                        .HasColumnType("infractions");
+                    b.Property<InfractionType>("Type")
+                        .HasColumnType("infraction_type");
 
                     b.HasKey("Id");
 
@@ -160,7 +160,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Infraction");
+                    b.ToTable("Infractions");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Message", b =>
@@ -193,7 +193,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Message");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Reminder", b =>
@@ -221,7 +221,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reminder");
+                    b.ToTable("Reminders");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Role", b =>
@@ -234,7 +234,7 @@ namespace ClemBot.Api.Data.Migrations
                     b.Property<int>("GuildId")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("IsAssignable")
+                    b.Property<bool?>("IsAssignable")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
@@ -246,7 +246,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("Role");
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Tag", b =>
@@ -274,7 +274,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.TagUse", b =>
@@ -304,7 +304,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TagUse");
+                    b.ToTable("TagUses");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.User", b =>
@@ -319,7 +319,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("GuildUser", b =>

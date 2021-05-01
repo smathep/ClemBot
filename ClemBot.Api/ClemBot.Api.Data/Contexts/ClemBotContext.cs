@@ -16,21 +16,21 @@ namespace ClemBot.Api.Data.Contexts
         {
             NpgsqlConnection.GlobalTypeMapper.MapEnum<Claims>();
             NpgsqlConnection.GlobalTypeMapper.MapEnum<DesignatedChannels>();
-            NpgsqlConnection.GlobalTypeMapper.MapEnum<Infractions>();
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<InfractionType>();
         }
 
-        public DbSet<Channel> Channel { get; set; }
-        public DbSet<ClaimsMapping> ClaimsMapping { get; set; }
-        public DbSet<CustomPrefix> CustomPrefix { get; set; }
-        public DbSet<DesignatedChannelMapping> DesignatedChannelMapping { get; set; }
-        public DbSet<Guild> Guild { get; set; }
-        public DbSet<Infraction> Infraction { get; set; }
-        public DbSet<Message> Message { get; set; }
-        public DbSet<Reminder> Reminder { get; set; }
-        public DbSet<Role> Role { get; set; }
-        public DbSet<Tag> Tag { get; set; }
-        public DbSet<TagUse> TagUse { get; set; }
-        public DbSet<User> User { get; set; }
+        public DbSet<Channel> Channels { get; set; }
+        public DbSet<ClaimsMapping> ClaimsMappings { get; set; }
+        public DbSet<CustomPrefix> CustomPrefixs { get; set; }
+        public DbSet<DesignatedChannelMapping> DesignatedChannelMappings { get; set; }
+        public DbSet<Guild> Guilds { get; set; }
+        public DbSet<Infraction> Infractions { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Reminder> Reminders { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<TagUse> TagUses { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,7 +40,7 @@ namespace ClemBot.Api.Data.Contexts
 
             modelBuilder.HasPostgresEnum<Claims>();
             modelBuilder.HasPostgresEnum<DesignatedChannels>();
-            modelBuilder.HasPostgresEnum<Infractions>();
+            modelBuilder.HasPostgresEnum<InfractionType>();
         }
     }
 }
