@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Utilities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Npgsql.Replication.PgOutput.Messages;
@@ -10,7 +12,8 @@ using Npgsql.Replication.PgOutput.Messages;
 namespace ClemBot.Api.Core.Features.Guilds
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
+    [AllowAnonymous]
     public class GuildsController : ControllerBase
     {
         private readonly ILogger<GuildsController> _logger;
@@ -22,27 +25,47 @@ namespace ClemBot.Api.Core.Features.Guilds
             _logger = logger;
             _mediator = mediator;
         }
-        
-        [HttpGet("index")]
+
+        [HttpGet]
         public async Task<IActionResult> Index()
-            => Ok(await _mediator.Send(new Index.Query()));
+            => await _mediator.Send(new Index.Query()) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                _ => Ok(new List<int>())
+            };
 
-        [HttpGet("details/{Id}")]
-        public async Task<IActionResult> Details([FromRoute]Details.Query query)
-            => Ok(await _mediator.Send(query));
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> Details([FromRoute] Details.Query query)
+            => await _mediator.Send(new Details.Query()) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                _ => Ok(new List<int>())
+            };
 
-        [HttpPut("add")]
+        [HttpPost]
         public async Task<IActionResult> Create(Add.Command command)
-        {
-            var c = await _mediator.Send(command);
-            return Ok(c);
-        }
-        
-        [HttpPost("edit")]
-        public async Task<IActionResult> Create(Edit.Command command)
-        {
-            var c = await _mediator.Send(command);
-            return Ok(c);
-        }
+            => await _mediator.Send(command) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                { Status: ResultStatus.Conflict } => Conflict(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpPost("AddUser")]
+        public async Task<IActionResult> AddUser(AddUser.Command command)
+            => await _mediator.Send(command) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                { Status: ResultStatus.Conflict } => Conflict(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpPatch]
+        public async Task<IActionResult> Edit(Edit.Command command)
+            => await _mediator.Send(command) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                _ => NotFound()
+            };
     }
 }

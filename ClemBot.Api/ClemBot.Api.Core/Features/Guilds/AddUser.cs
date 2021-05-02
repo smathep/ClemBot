@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,22 +12,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClemBot.Api.Core.Features.Guilds
 {
-    public class Edit
+    public class AddUser
     {
         public class Validator : AbstractValidator<Command>
         {
             public Validator()
             {
-                RuleFor(p => p.Id).NotNull();
-                RuleFor(p => p.Name).NotNull();
+                RuleFor(p => p.GuildId).NotNull();
+                RuleFor(p => p.UserId).NotNull();
             }
         }
 
         public class Command : IRequest<IResult<int>>
         {
-            public int Id { get; set; }
-
-            public string Name { get; set; } = null!;
+            public int GuildId { get; set; }
+            public int UserId { get; set; }
         }
 
         public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
@@ -33,14 +34,21 @@ namespace ClemBot.Api.Core.Features.Guilds
             public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var guild = await _context.Guilds
-                   .FirstOrDefaultAsync(g => g.Id == request.Id);
+                    .Where(x => x.Id == request.UserId)
+                    .Include(y => y.Users)
+                    .FirstAsync();
                 
-                if (guild is null)
+                var user = await _context.Users
+                    .Where(x => x.Id == request.UserId)
+                    .Include(y => y.Guilds)
+                    .FirstAsync();
+                
+                if (guild.Users.Contains(user))
                 {
-                    return Result<int>.NotFound();
+                    return Result<int>.Conflict();
                 }
                 
-                guild.Name = request.Name;
+                guild.Users.Add(user);
                 await _context.SaveChangesAsync();
 
                 return Result<int>.Success(guild.Id);

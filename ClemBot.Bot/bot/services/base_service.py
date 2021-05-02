@@ -1,6 +1,8 @@
 import abc
 import inspect
 
+from clem_bot import ClemBot
+
 
 class BaseService(abc.ABC):
     """
@@ -10,7 +12,7 @@ class BaseService(abc.ABC):
     """
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: ClemBot = bot
         self.messenger = bot.messenger
 
         for _, value in inspect.getmembers(self):

@@ -6,8 +6,9 @@ from pathlib import Path
 
 import discord
 
-from bot.bot_secrets import BotSecrets
-from bot.clem_bot import ClemBot as ClemBot
+from api.api_client import ApiClient
+import bot_secrets
+from bot.clem_bot import ClemBot
 from bot.custom_prefix import CustomPrefix
 from bot.messaging.events import Events
 from bot.messaging.messenger import Messenger
@@ -44,12 +45,12 @@ def main():
     # check if this is a prod or a dev instance
     if bool(os.environ.get('PROD')):
         bot_log.info('Production env var found, loading production enviroment')
-        BotSecrets.get_instance().load_production_secrets()
+        bot_secrets.secrets.load_production_secrets()
     else:
         try:
             bot_log.info(f'Attempting to load BotSecrets.json from {os.getcwd()}')
             with open("BotSecrets.json") as f:
-                BotSecrets.get_instance().load_development_secrets(f.read())
+                bot_secrets.secrets.load_development_secrets(f.read())
         except FileNotFoundError as e:
             bot_log.error(f'{e}: The bot could not find your BotSecrets Json File')
             sys.exit(0)
@@ -60,7 +61,7 @@ def main():
             bot_log.error(e)
 
     # get the default prefix for the bot instance
-    prefix = BotSecrets.get_instance().bot_prefix
+    prefix = bot_secrets.secrets.bot_prefix
 
     # Initialize the messenger here and inject it into the base bot class,
     # this is so it can be reused later on
@@ -80,6 +81,9 @@ def main():
     # Create the scheduler for injection into the bot instance
     scheduler = Scheduler()
 
+    # Create the api client for injection into the bot
+    client = ApiClient()
+
     # set allowed mentions
     mentions = discord.AllowedMentions(everyone=False, roles=False)
 
@@ -87,13 +91,14 @@ def main():
     ClemBot(
         messenger=messenger,
         scheduler=scheduler,
+        api_client=client,
         command_prefix=custom_prefix.get_prefix,  # noqa: E126
         help_command=None,
         case_insensitive=True,
         max_messages=50000,
         allowed_mentions=mentions,
         intents=intents
-    ).run(BotSecrets.get_instance().bot_token)
+    ).run(bot_secrets.secrets.bot_token)
 
 
 if __name__ == '__main__':

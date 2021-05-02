@@ -6,7 +6,7 @@ import discord
 import discord.ext.commands as commands
 
 import bot.extensions as ext
-from bot.clem_bot import BotSecrets
+import bot_secrets
 from bot.consts import Colors
 from bot.messaging.events import Events
 
@@ -26,7 +26,7 @@ class GifMeCog(commands.Cog):
     async def gifme(self, ctx, *args):
 
         params = {
-            "api_key": BotSecrets.get_instance().gif_me_token,
+            "api_key": bot_secrets.secrets.gif_me_token,
             "rating": "PG-13"
         }
 

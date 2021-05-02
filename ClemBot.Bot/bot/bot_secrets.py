@@ -8,21 +8,7 @@ log = logging.getLogger(__name__)
 
 
 class BotSecrets:
-    __instance = None
-
-    @staticmethod
-    def get_instance() -> 'BotSecrets':
-        """ Static access method. """
-        if BotSecrets.__instance is None:
-            BotSecrets()
-        return BotSecrets.__instance
-
     def __init__(self):
-        """ Virtually private constructor. """
-        if BotSecrets.__instance is not None:
-            raise Exception("BotSecrets is in singleton scope")
-        else:
-            BotSecrets.__instance = self
         self._client_token = None
         self._client_secret = None
         self._bot_token = None
@@ -36,6 +22,7 @@ class BotSecrets:
         self._geocode_key = None
         self._merriam_key = None
         self._azure_translate_key = None
+        self._api_url = None
 
     @property
     def client_token(self) -> str:
@@ -202,9 +189,20 @@ class BotSecrets:
             raise ConfigAccessError(f'azure_translate_key has already been initialized')
         self._azure_translate_key = value
 
+    @property
+    def api_url(self) -> str:
+        if not self._api_url:
+            raise ConfigAccessError(f'api_url has not been initialized')
+        return self._api_url
+
+    @api_url.setter
+    def api_url(self, value: str) -> None:
+        if self._api_url:
+            raise ConfigAccessError(f'api_url has already been initialized')
+        self._api_url = value
+
     def load_development_secrets(self, lines: str) -> None:
         secrets = json.loads(lines)
-        log.info('Bot Secrets Loaded')
 
         self.client_token = secrets['ClientToken']
         self.client_secret = secrets['ClientSecret']
@@ -218,6 +216,9 @@ class BotSecrets:
         self.weather_key = secrets['WeatherKey']
         self.geocode_key = secrets['GeocodeKey']
         self.azure_translate_key = secrets['AzureTranslateKey']
+        self.api_url = secrets['ApiUrl']
+
+        log.info('Bot Secrets Loaded')
 
     def load_production_secrets(self) -> None:
 
@@ -233,5 +234,8 @@ class BotSecrets:
         self.weather_key = os.environ.get('WEATHER_KEY')
         self.geocode_key = os.environ.get('GEOCODE_KEY')
         self.azure_translate_key = os.environ.get('AZURE_TRANSLATE_KEY')
+        self.api_url = os.environ.get('API_URL')
 
         log.info('Production keys loaded')
+
+secrets = BotSecrets()

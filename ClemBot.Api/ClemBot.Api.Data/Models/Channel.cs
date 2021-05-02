@@ -11,6 +11,8 @@ namespace ClemBot.Api.Data.Models
         public int GuildId { get; set; }
         public Guild Guild { get; set; }
 
+        public List<Message> Messages { get; set; } = new();
+
         public List<DesignatedChannelMapping> DesignatedChannels { get; set; } = new();
     }
 }

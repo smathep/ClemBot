@@ -9,16 +9,21 @@ from types import ModuleType
 import discord
 from discord.ext import commands
 
+import api
 import bot.cogs as cogs
 import bot.extensions as ext
 import bot.services as services
-from bot.bot_secrets import BotSecrets
+from api.api_client import ApiClient
+import bot_secrets
+from api.base_route import BaseRoute
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
 from bot.data.claims_repository import ClaimsRepository
 from bot.data.database import Database
 from bot.data.logout_repository import LogoutRepository
 from bot.errors import ClaimsAccessError
 from bot.messaging.events import Events
+from messaging.messenger import Messenger
+from utils.scheduler import Scheduler
 
 log = logging.getLogger(__name__)
 
@@ -31,17 +36,20 @@ class ClemBot(commands.Bot):
     as well as the dynamic loading of services and cogs
     """
 
-    def __init__(self, messenger, scheduler, **kwargs):
+    def __init__(self, messenger, scheduler, api_client, **kwargs):
         # this super call is to pass the prefix up to the super class
         super().__init__(**kwargs)
 
-        self.messenger = messenger
-        self.scheduler = scheduler
+        self.messenger: Messenger = messenger
+        self.scheduler: Scheduler = scheduler
 
         self._before_invoke = self.command_claims_check
 
         self.load_cogs()
         self.active_services = {}
+
+        self.load_routes(api_client)
+        a = 3
 
     async def on_ready(self) -> None:
         """
@@ -51,7 +59,7 @@ class ClemBot(commands.Bot):
 
         await self.change_presence(activity=discord.Game(name='Run !help'))
 
-        await Database(BotSecrets.get_instance().database_name).create_database()
+        await Database(bot_secrets.secrets.database_name).create_database()
         await self.load_services()
 
         # Send the ready event AFTER services have been loaded so that the designated channel service is there
@@ -280,26 +288,38 @@ class ClemBot(commands.Bot):
             await self.global_error_handler(e)
         self.active_services[service.__name__] = s
 
+    def activate_route(self, client: ApiClient, route):
+        log.info(f'Loading route: {route.__module__}')
+        r = route(api_client=client)
+        # Here we remove the first 4 characters of the module name
+        # That's because __module__ gives us the full name e.g api.guild_route
+        # so we need to remove the api. to correctly set the attr name
+        self.__setattr__(r.__module__[4:], r)
+
     async def load_services(self) -> None:
         log.info('Loading Services')
-        # self.load_extension("Cogs.manage_classes")
         for m in ClemBot.walk_modules('services', services):
             for s in ClemBot.walk_types(m, services.base_service.BaseService):
                 if s is not services.base_service.BaseService:
                     await self.activate_service(s)
 
+    def load_routes(self, client: ApiClient) -> None:
+        log.info('Loading routes')
+        for m in ClemBot.walk_modules('api', api):
+            for r in ClemBot.walk_types(m, api.base_route.BaseRoute):
+                if r is not api.base_route.BaseRoute:
+                    self.activate_route(client, r)
+
     def load_cogs(self) -> None:
         log.info('Loading Cogs')
-        # self.load_extension("Cogs.manage_classes")
         for m in ClemBot.walk_modules('cogs', cogs):
             for c in ClemBot.walk_types(m, commands.Cog):
                 log.info(f'Loading cog: {c.__module__}')
                 self.load_extension(c.__module__)
 
     @staticmethod
-    def walk_modules(module: str, pkg: any) -> t.Iterator[ModuleType]:
+    def walk_modules(module: str, pkg: t.Any) -> t.Iterator[ModuleType]:
         """Yield imported modules from the subpackage."""
-
         def on_error(name: str) -> t.NoReturn:
             raise ImportError(name=name)
 
@@ -308,7 +328,7 @@ class ClemBot(commands.Bot):
                 yield importlib.import_module(name)
 
     @staticmethod
-    def walk_types(module: ModuleType, base: any) -> t.Iterator[commands.Cog]:
+    def walk_types(module: ModuleType, base: t.Any) -> t.Iterator[commands.Cog]:
         """Yield all cogs defined in an extension."""
         for obj in module.__dict__.values():
             # Check if it's a class type cause otherwise issubclass() may raise a TypeError.

@@ -5,7 +5,7 @@ import discord
 import discord.ext.commands as commands
 
 import bot.extensions as ext
-from bot.bot_secrets import BotSecrets
+import bot_secrets
 from bot.consts import Claims, Colors
 from bot.data.custom_prefixes_repository import CustomPrefixesRepository
 from bot.messaging.events import Events
@@ -65,7 +65,7 @@ class CustomPrefixCog(commands.Cog):
     @ext.example('prefix set')
     async def reset(self, ctx):
 
-        default_prefix = BotSecrets.get_instance().bot_prefix
+        default_prefix = bot_secrets.secrets.bot_prefix
 
         if default_prefix in await self.bot.get_prefix(ctx.message):
             embed = discord.Embed(title='Error', color=Colors.Error)

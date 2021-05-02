@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ClemBot.Api.Data.Migrations
 {
     [DbContext(typeof(ClemBotContext))]
-    [Migration("20210501022456_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210501152710_AddedTagNavProp")]
+    partial class AddedTagNavProp
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -264,6 +264,9 @@ namespace ClemBot.Api.Data.Migrations
                     b.Property<int>("GuildId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("Time")
                         .HasColumnType("timestamp without time zone");
 
@@ -316,8 +319,8 @@ namespace ClemBot.Api.Data.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("Name")
-                        .HasColumnType("integer");
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -392,7 +395,7 @@ namespace ClemBot.Api.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ClemBot.Api.Data.Models.Guild", "Guild")
-                        .WithMany()
+                        .WithMany("Infractions")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -413,7 +416,7 @@ namespace ClemBot.Api.Data.Migrations
             modelBuilder.Entity("ClemBot.Api.Data.Models.Message", b =>
                 {
                     b.HasOne("ClemBot.Api.Data.Models.Channel", "Channel")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -425,7 +428,7 @@ namespace ClemBot.Api.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ClemBot.Api.Data.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -440,7 +443,7 @@ namespace ClemBot.Api.Data.Migrations
             modelBuilder.Entity("ClemBot.Api.Data.Models.Reminder", b =>
                 {
                     b.HasOne("ClemBot.Api.Data.Models.Guild", "Message")
-                        .WithMany()
+                        .WithMany("Reminders")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -459,7 +462,7 @@ namespace ClemBot.Api.Data.Migrations
             modelBuilder.Entity("ClemBot.Api.Data.Models.Role", b =>
                 {
                     b.HasOne("ClemBot.Api.Data.Models.Guild", "Guild")
-                        .WithMany()
+                        .WithMany("Roles")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -470,13 +473,13 @@ namespace ClemBot.Api.Data.Migrations
             modelBuilder.Entity("ClemBot.Api.Data.Models.Tag", b =>
                 {
                     b.HasOne("ClemBot.Api.Data.Models.Guild", "Guild")
-                        .WithMany()
+                        .WithMany("Tags")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ClemBot.Api.Data.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Tags")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -531,6 +534,8 @@ namespace ClemBot.Api.Data.Migrations
             modelBuilder.Entity("ClemBot.Api.Data.Models.Channel", b =>
                 {
                     b.Navigation("DesignatedChannels");
+
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Guild", b =>
@@ -539,12 +544,27 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.Navigation("CustomPrefixes");
 
+                    b.Navigation("Infractions");
+
                     b.Navigation("Messages");
+
+                    b.Navigation("Reminders");
+
+                    b.Navigation("Roles");
+
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Tag", b =>
                 {
                     b.Navigation("TagUses");
+                });
+
+            modelBuilder.Entity("ClemBot.Api.Data.Models.User", b =>
+                {
+                    b.Navigation("Messages");
+
+                    b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618
         }

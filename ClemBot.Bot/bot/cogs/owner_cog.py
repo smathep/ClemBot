@@ -7,7 +7,7 @@ import aiosqlite
 import discord
 import discord.ext.commands as commands
 
-from bot.bot_secrets import BotSecrets
+import bot_secrets
 from bot.consts import Colors, DiscordLimits, OwnerDesignatedChannels, DesignatedChannels
 from bot.data.base_repository import BaseRepository
 from bot.data.designated_channel_repository import DesignatedChannelRepository
@@ -177,7 +177,7 @@ class OwnerCog(commands.Cog):
     async def database(self, ctx, *, query):
         """Runs arbitrary sql queries on the db in readonly mode and returns the results"""
 
-        database_name = BotSecrets.get_instance().database_name
+        database_name = bot_secrets.secrets.database_name
         db_path = f'database/{database_name}'
         connect_mode = 'ro'
         json_params = {

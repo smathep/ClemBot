@@ -7,7 +7,7 @@ import discord
 import discord.ext.commands as commands
 
 import bot.extensions as ext
-from bot.bot_secrets import BotSecrets
+import bot_secrets
 from bot.consts import Colors
 from bot.messaging.events import Events
 from bot.utils.displayable_path import DisplayablePath
@@ -30,7 +30,7 @@ class SourceCodeCog(commands.Cog):
         self.bot = bot
         self.bot_files = {}
         self.ignored = ['Logs', 'venv', '__pycache__', 'database', '.git', '.pytest_cache', 'bot_env.env']
-        self.repo_url = BotSecrets.get_instance().github_url
+        self.repo_url = bot_secrets.secrets.github_url
 
         root = os.getcwd()
         root_dir = root.split('/')[-1]

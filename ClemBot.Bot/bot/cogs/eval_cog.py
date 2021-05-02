@@ -7,8 +7,7 @@ import discord.ext.commands as commands
 import discord.utils as utils
 
 import bot.extensions as ext
-from bot.bot_secrets import BotSecrets
-
+import bot_secrets
 log = logging.getLogger(__name__)
 
 HEADERS = {
@@ -76,7 +75,7 @@ class EvalCog(commands.Cog):
         json_data = json.dumps(data)
 
         async with aiohttp.ClientSession() as s:
-            async with s.post(BotSecrets.get_instance().repl_url,
+            async with s.post(bot_secrets.secrets.repl_url,
                               data=json_data,
                               headers=HEADERS) as resp:
                 if resp.status == 200:

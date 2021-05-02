@@ -6,8 +6,12 @@ namespace ClemBot.Api.Data.Models
     {
         public int Id { get; set; }
         
-        public int Name { get; set; }
+        public string Name { get; set; }
 
         public List<Guild> Guilds { get; set; } = new();
+        
+        public List<Tag> Tags { get; set; } = new();
+        
+        public List<Message> Messages { get; set; } = new();
     }
 }

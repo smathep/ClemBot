@@ -8,7 +8,7 @@ import discord.ext.commands as commands
 from discord.ext.commands.errors import UserInputError
 
 import bot.extensions as ext
-from bot.bot_secrets import BotSecrets
+import bot_secrets
 from bot.consts import Colors
 from bot.messaging.events import Events
 
@@ -133,7 +133,7 @@ class TranslateCog(commands.Cog):
         }]
 
         headers = {
-            'Ocp-Apim-Subscription-Key': BotSecrets.get_instance().azure_translate_key,
+            'Ocp-Apim-Subscription-Key': bot_secrets.secrets.azure_translate_key,
             'Ocp-Apim-Subscription-Region': 'global',
             'Content-type': 'application/json',
             'X-ClientTraceId': TRACE_ID
@@ -169,7 +169,7 @@ class TranslateCog(commands.Cog):
         }]
 
         headers = {
-            'Ocp-Apim-Subscription-Key': BotSecrets.get_instance().azure_translate_key,
+            'Ocp-Apim-Subscription-Key': bot_secrets.secrets.azure_translate_key,
             'Ocp-Apim-Subscription-Region': 'global',
             'Content-type': 'application/json',
             'X-ClientTraceId': TRACE_ID

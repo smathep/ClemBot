@@ -2,8 +2,7 @@ import logging
 
 import aiosqlite
 
-from bot.bot_secrets import BotSecrets
-
+import bot_secrets
 log = logging.getLogger(__name__)
 
 
@@ -14,7 +13,7 @@ class BaseRepository:
     """
 
     def __init__(self):
-        self.database_name = BotSecrets.get_instance().database_name
+        self.database_name = bot_secrets.secrets.database_name
         self.resolved_db_path = f'database/{self.database_name}'
 
     async def fetcthall_as_dict(self, cursor: aiosqlite.Cursor):

@@ -1,9 +1,12 @@
 from enum import Enum, auto
 
 
+class Urls:
+    base_api_url = 'api/'
+
+
 class Colors:
     """Hex Color values"""
-
     Error = 0xE20000
     ClemsonOrange = 0xF56600
 
