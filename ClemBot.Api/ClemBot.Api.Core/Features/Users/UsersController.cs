@@ -27,7 +27,7 @@ namespace ClemBot.Api.Core.Features.Users
             => Ok(await _mediator.Send(query));
 
         [HttpPut]
-        public async Task<IActionResult> Create(Add.Command command)
+        public async Task<IActionResult> Create(Create.Command command)
         {
             var c = await _mediator.Send(command);
             return Ok(c);

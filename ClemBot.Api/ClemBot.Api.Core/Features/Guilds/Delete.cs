@@ -19,17 +19,17 @@ namespace ClemBot.Api.Core.Features.Guilds
         public class Model
         {
             public int Id { get; set; }
-            
+
             public string? Name { get; set; }
         }
-        
+
         public record QueryHandler(ClemBotContext _context) : IRequestHandler<Query, IResult<Model>>
         {
             public async Task<IResult<Model>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var guild = await _context.Guilds
                    .FirstOrDefaultAsync(g => g.Id == request.Id);
-                
+
                 if (guild is null)
                 {
                     return Result<Model>.NotFound();

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,15 +24,22 @@ namespace ClemBot.Api.Core.Features.Roles
             => Ok(await _mediator.Send(new Index.Query()));
 
         [HttpGet("{Id}")]
-        public async Task<IActionResult> Details([FromRoute] Details.Query query)
-            => Ok(await _mediator.Send(query));
+        public async Task<IActionResult> Details([FromRoute] Details.Query query) =>
+            await _mediator.Send(query) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                _ => Ok(new List<int>())
+            };
 
-        [HttpPut]
-        public async Task<IActionResult> Create(Add.Command command)
-        {
-            var c = await _mediator.Send(command);
-            return Ok(c);
-        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(Create.Command command) =>
+            await _mediator.Send(command) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                { Status: ResultStatus.Conflict } => Conflict(),
+                _ => throw new InvalidOperationException()
+            };
 
         [HttpPatch]
         public async Task<IActionResult> Create(Edit.Command command)

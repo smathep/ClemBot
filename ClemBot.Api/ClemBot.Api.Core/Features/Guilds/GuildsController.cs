@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,15 +30,15 @@ namespace ClemBot.Api.Core.Features.Guilds
         public async Task<IActionResult> Index() =>
             await _mediator.Send(new Index.Query()) switch
             {
-                {Status: ResultStatus.Success} result => Ok(result.Value),
+                { Status: ResultStatus.Success } result => Ok(result.Value),
                 _ => Ok(new List<int>())
             };
 
         [HttpGet("{Id}")]
         public async Task<IActionResult> Details([FromRoute] Details.Query query) =>
-            await _mediator.Send(new Details.Query()) switch
+            await _mediator.Send(query) switch
             {
-                {Status: ResultStatus.Success} result => Ok(result.Value),
+                { Status: ResultStatus.Success } result => Ok(result.Value),
                 _ => Ok(new List<int>())
             };
 
@@ -46,16 +46,16 @@ namespace ClemBot.Api.Core.Features.Guilds
         public async Task<IActionResult> Delete([FromRoute] Delete.Query query) =>
             await _mediator.Send(new Details.Query()) switch
             {
-                {Status: ResultStatus.Success} result => Ok(result.Value),
+                { Status: ResultStatus.Success } result => Ok(result.Value),
                 _ => Ok(new List<int>())
             };
 
         [HttpPost]
-        public async Task<IActionResult> Create(Add.Command command) =>
+        public async Task<IActionResult> Create(Create.Command command) =>
             await _mediator.Send(command) switch
             {
-                {Status: ResultStatus.Success} result => Ok(result.Value),
-                {Status: ResultStatus.Conflict} => Conflict(),
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                { Status: ResultStatus.Conflict } => Conflict(),
                 _ => throw new InvalidOperationException()
             };
 
@@ -63,8 +63,8 @@ namespace ClemBot.Api.Core.Features.Guilds
         public async Task<IActionResult> AddUser(AddUser.Command command) =>
             await _mediator.Send(command) switch
             {
-                {Status: ResultStatus.Success} result => Ok(result.Value),
-                {Status: ResultStatus.Conflict} => Conflict(),
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                { Status: ResultStatus.Conflict } => Conflict(),
                 _ => throw new InvalidOperationException()
             };
 
@@ -72,7 +72,7 @@ namespace ClemBot.Api.Core.Features.Guilds
         public async Task<IActionResult> Edit(Edit.Command command) =>
             await _mediator.Send(command) switch
             {
-                {Status: ResultStatus.Success} result => Ok(result.Value),
+                { Status: ResultStatus.Success } result => Ok(result.Value),
                 _ => NotFound()
             };
     }

@@ -11,7 +11,7 @@ namespace ClemBot.Api.Data.Contexts
             : base(options)
         {
         }
-        
+
         static ClemBotContext()
         {
             NpgsqlConnection.GlobalTypeMapper.MapEnum<Claims>();

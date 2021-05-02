@@ -17,13 +17,13 @@ namespace ClemBot.Api.Core.Features.Guilds
         public class Query : IRequest<IResult<IEnumerable<Model>>>
         {
         }
-        
+
         public class Model
         {
             public int Id { get; set; }
 
             public string Name { get; set; } = null!;
-            
+
             public string? WelcomeMessage { get; set; }
         }
 
@@ -37,7 +37,7 @@ namespace ClemBot.Api.Core.Features.Guilds
                 {
                     return Result<IEnumerable<Model>>.NotFound();
                 }
-                
+
                 return Result<IEnumerable<Model>>.Success(guilds.Select(x => new Model()
                 {
                     Id = x.Id,

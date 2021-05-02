@@ -1,17 +1,17 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using ClemBot.Api.Core.Utilities;
 using ClemBot.Api.Data.Contexts;
 using ClemBot.Api.Data.Models;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Guilds
+namespace ClemBot.Api.Core.Features.Users
 {
-    public class Add
+    public class Create
     {
         public class Validator : AbstractValidator<Command>
         {
@@ -22,32 +22,27 @@ namespace ClemBot.Api.Core.Features.Guilds
             }
         }
 
-        public class Command : IRequest<IResult<int>>
+        public class Command : IRequest<int>
         {
             public int Id { get; set; }
 
             public string Name { get; set; } = null!;
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, int>
         {
-            public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<int> Handle(Command request, CancellationToken cancellationToken)
             {
-                var guild = new Guild()
+                var user = new User()
                 {
                     Id = request.Id,
-                    Name = request.Name
+                    Name = request.Name,
                 };
+                _context.Users.Add(user);
 
-                if (await _context.Guilds.Where(x => x.Id == guild.Id).AnyAsync())
-                {
-                    return Result<int>.Conflict();
-                }
-                
-                _context.Guilds.Add(guild);
                 await _context.SaveChangesAsync();
 
-                return Result<int>.Success(guild.Id);
+                return user.Id;
             }
         }
     }

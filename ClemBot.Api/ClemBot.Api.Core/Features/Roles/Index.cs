@@ -29,15 +29,15 @@ namespace ClemBot.Api.Core.Features.Roles
         public record Handler(ClemBotContext _context) : IRequestHandler<Query, IEnumerable<Model>>
         {
             public async Task<IEnumerable<Model>> Handle(Query request, CancellationToken cancellationToken)
-        {
-            var users = await _context.Roles.ToListAsync();
-            return users.Select(x => new Model()
             {
-                Id = x.Id,
-                Name = x.Name,
-                GuildId = x.GuildId
-            });
+                var users = await _context.Roles.ToListAsync();
+                return users.Select(x => new Model()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    GuildId = x.GuildId
+                });
+            }
         }
     }
-}
 }

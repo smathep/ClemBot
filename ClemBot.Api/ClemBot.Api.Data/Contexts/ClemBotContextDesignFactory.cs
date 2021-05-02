@@ -11,7 +11,7 @@ namespace ClemBot.Api.Data.Contexts
             var configuration = new ConfigurationBuilder()
                 .AddUserSecrets<ClemBotContext>()
                 .Build();
-            
+
             var builder = new DbContextOptionsBuilder<ClemBotContext>();
             builder.UseNpgsql(configuration["ClemBotConnectionString"]);
 

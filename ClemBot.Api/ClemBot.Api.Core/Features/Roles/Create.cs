@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,9 +10,9 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Guilds
+namespace ClemBot.Api.Core.Features.Roles
 {
-    public class Edit
+    public class Create
     {
         public class Validator : AbstractValidator<Command>
         {
@@ -26,36 +28,30 @@ namespace ClemBot.Api.Core.Features.Guilds
             public int Id { get; set; }
 
             public string Name { get; set; } = null!;
+
+            public int GuildId { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, IResult<int>>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
         {
-            public Handler(ClemBotContext _context)
-            {
-                this._context = _context;
-            }
-
             public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var guild = await _context.Guilds
-                   .FirstOrDefaultAsync(g => g.Id == request.Id);
-
-                if (guild is null)
+                var role = new Role()
                 {
-                    return Result<int>.NotFound();
-                }
+                    Id = request.Id,
+                    Name = request.Name,
+                    GuildId = request.GuildId
+                };
 
-                guild.Name = request.Name;
+                if (await _context.Roles.Where(x => x.Id == role.Id).AnyAsync())
+                {
+                    return Result<int>.Conflict();
+                }
+                _context.Roles.Add(role);
+
                 await _context.SaveChangesAsync();
 
-                return Result<int>.Success(guild.Id);
-            }
-
-            public ClemBotContext _context { get; init; }
-
-            public void Deconstruct(out ClemBotContext _context)
-            {
-                _context = this._context;
+                return Result<int>.Success(role.Id);
             }
         }
     }

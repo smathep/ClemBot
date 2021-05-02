@@ -33,15 +33,13 @@ namespace ClemBot.Api.Core
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers().AddFluentValidation(s =>
-            {
+            services.AddControllers().AddFluentValidation(s => {
                 s.RegisterValidatorsFromAssemblyContaining<Startup>();
             });
 
             services.AddMediatR(typeof(Startup));
 
-            services.AddSwaggerGen(o =>
-            {
+            services.AddSwaggerGen(o => {
                 o.SwaggerDoc("v1", new OpenApiInfo { Title = "ClemBot.Api", Version = "1.0.0" });
                 o.CustomSchemaIds(type => type.ToString());
             });

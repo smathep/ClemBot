@@ -42,8 +42,7 @@ namespace ClemBot.Api.Core
         public static IHostBuilder CreateHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
                 .UseSerilog()
-                .ConfigureAppConfiguration((hostingContext, config) =>
-                {
+                .ConfigureAppConfiguration((hostingContext, config) => {
                     config.AddUserSecrets<ClemBotContext>();
                     config.AddEnvironmentVariables();
 
@@ -52,8 +51,7 @@ namespace ClemBot.Api.Core
                         config.AddCommandLine(args);
                     }
                 })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
+                .ConfigureWebHostDefaults(webBuilder => {
                     webBuilder.UseStartup<Startup>();
                 });
     }

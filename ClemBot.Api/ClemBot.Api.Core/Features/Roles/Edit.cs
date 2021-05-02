@@ -27,18 +27,30 @@ namespace ClemBot.Api.Core.Features.Roles
             public string Name { get; set; } = null!;
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, int>
+        public class Handler : IRequestHandler<Command, int>
         {
+            public Handler(ClemBotContext _context)
+            {
+                this._context = _context;
+            }
+
             public async Task<int> Handle(Command request, CancellationToken cancellationToken)
-        {
-            var role = await _context.Roles
-               .FirstOrDefaultAsync(g => g.Id == request.Id);
+            {
+                var role = await _context.Roles
+                   .FirstOrDefaultAsync(g => g.Id == request.Id);
 
-            role.Name = request.Name;
-            await _context.SaveChangesAsync();
+                role.Name = request.Name;
+                await _context.SaveChangesAsync();
 
-            return role.Id;
+                return role.Id;
+            }
+
+            public ClemBotContext _context { get; init; }
+
+            public void Deconstruct(out ClemBotContext _context)
+            {
+                _context = this._context;
+            }
         }
     }
-}
 }

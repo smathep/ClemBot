@@ -1,17 +1,17 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Utilities;
 using ClemBot.Api.Data.Contexts;
 using ClemBot.Api.Data.Models;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Roles
+namespace ClemBot.Api.Core.Features.Guilds
 {
-    public class Add
+    public class Create
     {
         public class Validator : AbstractValidator<Command>
         {
@@ -22,30 +22,32 @@ namespace ClemBot.Api.Core.Features.Roles
             }
         }
 
-        public class Command : IRequest<int>
+        public class Command : IRequest<IResult<int>>
         {
             public int Id { get; set; }
 
             public string Name { get; set; } = null!;
-
-            public int GuildId { get; set; }
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, int>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
         {
-            public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var role = new Role()
+                var guild = new Guild()
                 {
                     Id = request.Id,
-                    Name = request.Name,
-                    GuildId = request.GuildId
+                    Name = request.Name
                 };
-                _context.Roles.Add(role);
 
+                if (await _context.Guilds.Where(x => x.Id == guild.Id).AnyAsync())
+                {
+                    return Result<int>.Conflict();
+                }
+
+                _context.Guilds.Add(guild);
                 await _context.SaveChangesAsync();
 
-                return role.Id;
+                return Result<int>.Success(guild.Id);
             }
         }
     }

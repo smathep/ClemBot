@@ -20,14 +20,14 @@ namespace ClemBot.Api.Core.Features.Guilds
         public class Model
         {
             public int Id { get; set; }
-            
+
             public string? Name { get; set; }
-            
+
             public string? WelcomeMessage { get; set; }
-            
+
             public List<int> Users { get; set; } = new();
         }
-        
+
         public record QueryHandler(ClemBotContext _context) : IRequestHandler<Query, IResult<Model>>
         {
             public async Task<IResult<Model>> Handle(Query request, CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ namespace ClemBot.Api.Core.Features.Guilds
                 {
                     return Result<Model>.NotFound();
                 }
-                
+
                 return Result<Model>.Success(new Model()
                 {
                     Id = guild.Id,

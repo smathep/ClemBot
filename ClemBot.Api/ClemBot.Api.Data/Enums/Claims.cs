@@ -20,6 +20,6 @@ namespace ClemBot.Api.Data.Enums
         moderation_ban,
         moderation_mute,
         moderation_purge,
-        moderation_infraction_view, 
+        moderation_infraction_view,
     }
 }
