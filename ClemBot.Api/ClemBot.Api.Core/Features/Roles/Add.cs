@@ -34,19 +34,19 @@ namespace ClemBot.Api.Core.Features.Roles
         public record Handler(ClemBotContext _context) : IRequestHandler<Command, int>
         {
             public async Task<int> Handle(Command request, CancellationToken cancellationToken)
-        {
-            var role = new Role()
             {
-                Id = request.Id,
-                Name = request.Name,
-                GuildId = request.GuildId
-            };
-            _context.Roles.Add(role);
+                var role = new Role()
+                {
+                    Id = request.Id,
+                    Name = request.Name,
+                    GuildId = request.GuildId
+                };
+                _context.Roles.Add(role);
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-            return role.Id;
+                return role.Id;
+            }
         }
     }
-}
 }
