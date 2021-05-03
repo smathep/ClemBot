@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Utilities;
 using ClemBot.Api.Data.Contexts;
 using ClemBot.Api.Data.Models;
 using FluentValidation;
@@ -22,27 +23,32 @@ namespace ClemBot.Api.Core.Features.Users
             }
         }
 
-        public class Command : IRequest<int>
+        public class Command : IRequest<IResult<int>>
         {
             public int Id { get; set; }
 
             public string Name { get; set; } = null!;
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, int>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
         {
-            public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var user = new User()
                 {
                     Id = request.Id,
                     Name = request.Name,
                 };
-                _context.Users.Add(user);
 
+                if (await _context.Roles.Where(x => x.Id == user.Id).AnyAsync())
+                {
+                    return Result<int>.Conflict();
+                }
+
+                _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                return user.Id;
+                return Result<int>.Success(user.Id);
             }
         }
     }

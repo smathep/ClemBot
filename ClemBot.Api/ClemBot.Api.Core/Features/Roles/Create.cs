@@ -47,8 +47,8 @@ namespace ClemBot.Api.Core.Features.Roles
                 {
                     return Result<int>.Conflict();
                 }
-                _context.Roles.Add(role);
 
+                _context.Roles.Add(role);
                 await _context.SaveChangesAsync();
 
                 return Result<int>.Success(role.Id);

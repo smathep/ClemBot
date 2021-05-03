@@ -42,10 +42,11 @@ namespace ClemBot.Api.Core.Features.Roles
             };
 
         [HttpPatch]
-        public async Task<IActionResult> Create(Edit.Command command)
-        {
-            var c = await _mediator.Send(command);
-            return Ok(c);
-        }
+        public async Task<IActionResult> Edit(Edit.Command command) =>
+            await _mediator.Send(command) switch
+            {
+                { Status: ResultStatus.Success } result => Ok(result.Value),
+                _ => NotFound()
+            };
     }
 }

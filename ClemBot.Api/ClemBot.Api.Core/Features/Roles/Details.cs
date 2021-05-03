@@ -38,6 +38,7 @@ namespace ClemBot.Api.Core.Features.Roles
                 {
                     return Result<Model>.NotFound();
                 }
+
                 return Result<Model>.Success(new Model()
                 {
                     Id = role.Id,

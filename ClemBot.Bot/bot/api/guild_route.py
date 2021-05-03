@@ -10,15 +10,13 @@ class GuildRoute(BaseRoute):
         super().__init__(api_client)
 
     async def add_guild(self, guild_id: int, name: str):
-
         if len((await self.client.get(f'guilds/{guild_id}')).value) > 0:
             return
 
         guild = {
-           "id": guild_id,
-           "name": name
+           'id': guild_id,
+           'name': name
         }
-
         await self.client.post('guilds', data=json.dumps(guild))
 
 
