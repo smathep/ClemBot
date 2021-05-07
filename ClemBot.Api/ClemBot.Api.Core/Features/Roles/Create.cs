@@ -23,18 +23,19 @@ namespace ClemBot.Api.Core.Features.Roles
             }
         }
 
-        public class Command : IRequest<IResult<int>>
+        public class Command : IRequest<Result<ulong, QueryStatus>>
+
         {
-            public int Id { get; set; }
+            public ulong Id { get; set; }
 
             public string Name { get; set; } = null!;
 
-            public int GuildId { get; set; }
+            public ulong GuildId { get; set; }
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
         {
-            public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var role = new Role()
                 {
@@ -45,13 +46,13 @@ namespace ClemBot.Api.Core.Features.Roles
 
                 if (await _context.Roles.Where(x => x.Id == role.Id).AnyAsync())
                 {
-                    return Result<int>.Conflict();
+                    return QueryResult<ulong>.Conflict();
                 }
 
                 _context.Roles.Add(role);
                 await _context.SaveChangesAsync();
 
-                return Result<int>.Success(role.Id);
+                return QueryResult<ulong>.Success(role.Id);
             }
         }
     }

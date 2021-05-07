@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,44 +10,49 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Roles
+namespace ClemBot.Api.Core.Features.Guilds
 {
-    public class Edit
+    public class RemoveUser
     {
         public class Validator : AbstractValidator<Command>
         {
             public Validator()
             {
-                RuleFor(p => p.Id).NotNull();
-                RuleFor(p => p.Name).NotNull();
+                RuleFor(p => p.GuildId).NotNull();
+                RuleFor(p => p.UserId).NotNull();
             }
         }
 
         public class Command : IRequest<Result<ulong, QueryStatus>>
 
         {
-            public ulong Id { get; set; }
-
-            public string Name { get; set; } = null!;
+            public ulong GuildId { get; set; }
+            public ulong UserId { get; set; }
         }
 
         public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
         {
             public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var role = await _context.Roles
-                   .FirstOrDefaultAsync(g => g.Id == request.Id);
+                var guild = await _context.Guilds
+                    .Where(x => x.Id == request.UserId)
+                    .Include(y => y.Users)
+                    .FirstAsync();
 
+                var user = await _context.Users
+                    .Where(x => x.Id == request.UserId)
+                    .Include(y => y.Guilds)
+                    .FirstAsync();
 
-                if (role is null)
+                if (!guild.Users.Contains(user))
                 {
                     return QueryResult<ulong>.NotFound();
                 }
 
-                role.Name = request.Name;
+                guild.Users.Remove(user);
                 await _context.SaveChangesAsync();
 
-                return QueryResult<ulong>.Success(role.Id);
+                return QueryResult<ulong>.Success(guild.Id);
             }
         }
     }

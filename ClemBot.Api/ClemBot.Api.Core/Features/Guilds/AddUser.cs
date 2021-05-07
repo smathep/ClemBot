@@ -23,18 +23,18 @@ namespace ClemBot.Api.Core.Features.Guilds
             }
         }
 
-        public class Command : IRequest<IResult<int>>
+        public class Command : IRequest<Result<ulong, QueryStatus>>
         {
-            public int GuildId { get; set; }
-            public int UserId { get; set; }
+            public ulong GuildId { get; set; }
+            public ulong UserId { get; set; }
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
         {
-            public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var guild = await _context.Guilds
-                    .Where(x => x.Id == request.UserId)
+                    .Where(x => x.Id == request.GuildId)
                     .Include(y => y.Users)
                     .FirstAsync();
 
@@ -45,13 +45,13 @@ namespace ClemBot.Api.Core.Features.Guilds
 
                 if (guild.Users.Contains(user))
                 {
-                    return Result<int>.Conflict();
+                    return QueryResult<ulong>.Conflict();
                 }
 
                 guild.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                return Result<int>.Success(guild.Id);
+                return QueryResult<ulong>.Success(guild.Id);
             }
         }
     }

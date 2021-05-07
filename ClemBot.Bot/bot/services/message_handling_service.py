@@ -26,7 +26,7 @@ class MessageHandlingService(BaseService):
         log.info(f'Message from {message.author}: "{message.content}" Guild {message.guild.id}')
         await self.handle_message_links(message)
 
-        await self.bot.guild_route.add_guild(333, 'apiTest')
+        bar = await self.bot.user_route.add_user_guild(2, 2)
 
         # Primary entry point for handling commands
         await self.bot.process_commands(message)

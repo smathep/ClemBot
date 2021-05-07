@@ -22,16 +22,17 @@ namespace ClemBot.Api.Core.Features.Guilds
             }
         }
 
-        public class Command : IRequest<IResult<int>>
+        public class Command : IRequest<Result<Guild, QueryStatus>>
+
         {
-            public int Id { get; set; }
+            public ulong Id { get; set; }
 
             public string Name { get; set; } = null!;
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<Guild, QueryStatus>>
         {
-            public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Guild, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var guild = new Guild()
                 {
@@ -41,13 +42,13 @@ namespace ClemBot.Api.Core.Features.Guilds
 
                 if (await _context.Guilds.Where(x => x.Id == guild.Id).AnyAsync())
                 {
-                    return Result<int>.Conflict();
+                    return QueryResult<Guild>.Conflict();
                 }
 
                 _context.Guilds.Add(guild);
                 await _context.SaveChangesAsync();
 
-                return Result<int>.Success(guild.Id);
+                return QueryResult<Guild>.Success(guild);
             }
         }
     }

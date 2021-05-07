@@ -12,23 +12,23 @@ namespace ClemBot.Api.Core.Features.Users
 {
     public class Details
     {
-        public class Query : IRequest<IResult<Model>>
+        public class Query : IRequest<Result<Model, QueryStatus>>
         {
-            public int Id { get; set; }
+            public ulong Id { get; set; }
         }
 
         public class Model
         {
-            public int Id { get; set; }
+            public ulong Id { get; set; }
 
             public string? Name { get; set; }
 
-            public List<int> Guilds { get; set; } = new();
+            public List<ulong> Guilds { get; set; } = new();
         }
 
-        public record QueryHandler(ClemBotContext _context) : IRequestHandler<Query, IResult<Model>>
+        public record QueryHandler(ClemBotContext _context) : IRequestHandler<Query, Result<Model, QueryStatus>>
         {
-            public async Task<IResult<Model>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<Model, QueryStatus>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var user = await _context.Users
                     .Where(x => x.Id == request.Id)
@@ -37,10 +37,10 @@ namespace ClemBot.Api.Core.Features.Users
 
                 if (user is null)
                 {
-                    return Result<Model>.NotFound();
+                    return QueryResult<Model>.NotFound();
                 }
 
-                return Result<Model>.Success(new Model()
+                return QueryResult<Model>.Success(new Model()
                 {
                     Id = user.Id,
                     Name = user.Name,

@@ -15,7 +15,7 @@ import bot.extensions as ext
 import bot.services as services
 from api.api_client import ApiClient
 import bot_secrets
-from api.base_route import BaseRoute
+from api import guild_route, user_route
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
 from bot.data.claims_repository import ClaimsRepository
 from bot.data.database import Database
@@ -44,6 +44,9 @@ class ClemBot(commands.Bot):
         self.scheduler: Scheduler = scheduler
 
         self._before_invoke = self.command_claims_check
+
+        self.guild_route: guild_route.GuildRoute = None
+        self.user_route: user_route.UserRoute = None
 
         self.load_cogs()
         self.active_services = {}
@@ -330,7 +333,7 @@ class ClemBot(commands.Bot):
     @staticmethod
     def walk_types(module: ModuleType, base: t.Any) -> t.Iterator[commands.Cog]:
         """Yield all cogs defined in an extension."""
-        for obj in module.__dict__.values():
+        for obj in list(module.__dict__.values()):
             # Check if it's a class type cause otherwise issubclass() may raise a TypeError.
             is_cog = isinstance(obj, type) and issubclass(obj, base)
             if is_cog and obj.__module__ == module.__name__:

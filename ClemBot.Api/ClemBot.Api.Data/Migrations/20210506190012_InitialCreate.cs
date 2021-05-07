@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using ClemBot.Api.Data.Enums;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ClemBot.Api.Data.Migrations
 {
@@ -11,41 +10,44 @@ namespace ClemBot.Api.Data.Migrations
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:claims", "designated_channel_view,designated_channel_modify,custom_prefix_set,welcome_message_view,welcome_message_modify,tag_add,tag_delete,assignable_roles_add,assignable_roles_delete,delete_message,emote_add,claims_view,claims_modify,manage_class_add,moderation_warn,moderation_ban,moderation_mute,moderation_purge,moderation_infraction_view")
-                .Annotation("Npgsql:Enum:designated_channels", "message_log,moderation_log,startup_log,user_join_log,user_leave_log,starboard")
+                .Annotation("Npgsql:Enum:designated_channels", "message_log,moderation_log,startup_log,user_join_log,user_leave_log,starboard,server_join_log,error_log,bot_dm_log")
                 .Annotation("Npgsql:Enum:infraction_type", "ban,mute,warn");
 
             migrationBuilder.CreateTable(
                 name: "Guilds",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     WelcomeMessage = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Guilds", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Users",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Channels",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    GuildId = table.Column<int>(type: "integer", nullable: false)
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Channels", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Channels_Guilds_GuildId",
@@ -57,13 +59,14 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "CustomPrefixs",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Prefix = table.Column<string>(type: "text", nullable: true),
-                    GuildId = table.Column<int>(type: "integer", nullable: false)
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_CustomPrefixs", x => x.Id);
                     table.ForeignKey(
                         name: "FK_CustomPrefixs_Guilds_GuildId",
@@ -75,14 +78,15 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Roles",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     IsAssignable = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
-                    GuildId = table.Column<int>(type: "integer", nullable: false)
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Roles", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Roles_Guilds_GuildId",
@@ -94,11 +98,13 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "GuildUser",
-                columns: table => new {
-                    GuildsId = table.Column<int>(type: "integer", nullable: false),
-                    UsersId = table.Column<int>(type: "integer", nullable: false)
+                columns: table => new
+                {
+                    GuildsId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    UsersId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_GuildUser", x => new { x.GuildsId, x.UsersId });
                     table.ForeignKey(
                         name: "FK_GuildUser_Guilds_GuildsId",
@@ -116,19 +122,20 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Infractions",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Type = table.Column<InfractionType>(type: "infraction_type", nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: true),
-                    Duration = table.Column<int>(type: "integer", nullable: true),
+                    Duration = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                     Time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    GuildId = table.Column<int>(type: "integer", nullable: false),
-                    AuthorId = table.Column<int>(type: "integer", nullable: false),
-                    SubjectId = table.Column<int>(type: "integer", nullable: false)
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    AuthorId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    SubjectId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Infractions", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Infractions_Guilds_GuildId",
@@ -152,15 +159,16 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Reminders",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Link = table.Column<string>(type: "text", nullable: true),
                     Time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    MessageId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    MessageId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    UserId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Reminders", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Reminders_Guilds_MessageId",
@@ -178,16 +186,17 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Tags",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Content = table.Column<string>(type: "text", nullable: true),
                     Time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    GuildId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    UserId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Tags", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Tags_Guilds_GuildId",
@@ -205,13 +214,14 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "DesignatedChannelMappings",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Type = table.Column<DesignatedChannels>(type: "designated_channels", nullable: false),
-                    ChannelId = table.Column<int>(type: "integer", nullable: false)
+                    ChannelId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_DesignatedChannelMappings", x => x.Id);
                     table.ForeignKey(
                         name: "FK_DesignatedChannelMappings_Channels_ChannelId",
@@ -223,16 +233,17 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Messages",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: true),
                     Time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    GuildId = table.Column<int>(type: "integer", nullable: false),
-                    ChannelId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    ChannelId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    UserId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Messages_Channels_ChannelId",
@@ -256,13 +267,14 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ClaimsMappings",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Claim = table.Column<Claims>(type: "claims", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                    RoleId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_ClaimsMappings", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ClaimsMappings_Roles_RoleId",
@@ -274,15 +286,16 @@ namespace ClemBot.Api.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TagUses",
-                columns: table => new {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                columns: table => new
+                {
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    TagId = table.Column<int>(type: "integer", nullable: false),
-                    ChannelId = table.Column<int>(type: "integer", nullable: false)
+                    UserId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    TagId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    ChannelId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_TagUses", x => x.Id);
                     table.ForeignKey(
                         name: "FK_TagUses_Channels_ChannelId",

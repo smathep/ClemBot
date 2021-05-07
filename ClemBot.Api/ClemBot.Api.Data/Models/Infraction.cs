@@ -5,7 +5,7 @@ namespace ClemBot.Api.Data.Models
 {
     public class Infraction
     {
-        public int Id { get; set; }
+        public ulong Id { get; set; }
 
         public InfractionType Type { get; set; }
 
@@ -13,17 +13,17 @@ namespace ClemBot.Api.Data.Models
 
         public bool? IsActive { get; set; }
 
-        public int? Duration { get; set; }
+        public ulong? Duration { get; set; }
 
         public DateTime Time { get; set; }
 
-        public int GuildId { get; set; }
+        public ulong GuildId { get; set; }
         public Guild Guild { get; set; }
 
-        public int AuthorId { get; set; }
+        public ulong AuthorId { get; set; }
         public User Author { get; set; }
 
-        public int SubjectId { get; set; }
+        public ulong SubjectId { get; set; }
         public User Subject { get; set; }
     }
 }

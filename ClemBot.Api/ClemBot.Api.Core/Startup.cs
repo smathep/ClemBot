@@ -76,11 +76,9 @@ namespace ClemBot.Api.Core
             context.Database.Migrate();
 
             // Reload enum types after a migration
-            /*
             using var conn = (NpgsqlConnection)context.Database.GetDbConnection();
             conn.Open();
             conn.ReloadTypes();
-            */
         }
     }
 }

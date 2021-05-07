@@ -8,5 +8,8 @@ namespace ClemBot.Api.Data.Enums
         user_join_log,
         user_leave_log,
         starboard,
+        server_join_log,
+        error_log,
+        bot_dm_log
     }
 }

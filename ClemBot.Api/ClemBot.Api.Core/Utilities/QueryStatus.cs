@@ -1,6 +1,6 @@
 namespace ClemBot.Api.Core.Utilities
 {
-    public enum ResultStatus
+    public enum QueryStatus
     {
         Success,
         Invalid,

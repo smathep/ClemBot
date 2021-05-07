@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Utilities;
@@ -23,16 +21,17 @@ namespace ClemBot.Api.Core.Features.Users
             }
         }
 
-        public class Command : IRequest<IResult<int>>
+        public class Command : IRequest<Result<ulong, QueryStatus>>
+
         {
-            public int Id { get; set; }
+            public ulong Id { get; set; }
 
             public string Name { get; set; } = null!;
         }
 
-        public record Handler(ClemBotContext _context) : IRequestHandler<Command, IResult<int>>
+        public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
         {
-            public async Task<IResult<int>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var user = new User()
                 {
@@ -42,13 +41,13 @@ namespace ClemBot.Api.Core.Features.Users
 
                 if (await _context.Roles.Where(x => x.Id == user.Id).AnyAsync())
                 {
-                    return Result<int>.Conflict();
+                    return QueryResult<ulong>.Conflict();
                 }
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                return Result<int>.Success(user.Id);
+                return QueryResult<ulong>.Success(user.Id);
             }
         }
     }

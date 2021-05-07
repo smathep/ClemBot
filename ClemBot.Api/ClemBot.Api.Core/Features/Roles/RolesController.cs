@@ -20,15 +20,19 @@ namespace ClemBot.Api.Core.Features.Roles
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
-            => Ok(await _mediator.Send(new Index.Query()));
+        public async Task<IActionResult> Index() =>
+            await _mediator.Send(new Index.Query()) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                _ => Ok(new List<ulong>())
+            };
 
         [HttpGet("{Id}")]
         public async Task<IActionResult> Details([FromRoute] Details.Query query) =>
             await _mediator.Send(query) switch
             {
-                { Status: ResultStatus.Success } result => Ok(result.Value),
-                _ => Ok(new List<int>())
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                _ => NoContent()
             };
 
 
@@ -36,8 +40,8 @@ namespace ClemBot.Api.Core.Features.Roles
         public async Task<IActionResult> Create(Create.Command command) =>
             await _mediator.Send(command) switch
             {
-                { Status: ResultStatus.Success } result => Ok(result.Value),
-                { Status: ResultStatus.Conflict } => Conflict(),
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.Conflict } => Conflict(),
                 _ => throw new InvalidOperationException()
             };
 
@@ -45,7 +49,7 @@ namespace ClemBot.Api.Core.Features.Roles
         public async Task<IActionResult> Edit(Edit.Command command) =>
             await _mediator.Send(command) switch
             {
-                { Status: ResultStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => NotFound()
             };
     }
