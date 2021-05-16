@@ -1,20 +1,19 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Utilities;
 using ClemBot.Api.Data.Contexts;
-using ClemBot.Api.Data.Models;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Roles
+namespace ClemBot.Api.Core.Features.Channels
 {
-    public class Details
+    public class Delete
     {
         public class Query : IRequest<Result<Model, QueryStatus>>
         {
-            public ulong Id { get; init; }
+            public ulong Id { get; set; }
         }
 
         public class Model
@@ -22,31 +21,27 @@ namespace ClemBot.Api.Core.Features.Roles
             public ulong Id { get; init; }
 
             public string? Name { get; init; }
-
-            public ulong GuildId { get; init; }
-
-            public bool IsAssignable { get; init; }
         }
 
         public record QueryHandler(ClemBotContext _context) : IRequestHandler<Query, Result<Model, QueryStatus>>
         {
             public async Task<Result<Model, QueryStatus>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var role = await _context.Roles
-                    .Where(x => x.Id == request.Id)
-                    .FirstAsync();
+                var channel = await _context.Channels
+                   .FirstOrDefaultAsync(g => g.Id == request.Id);
 
-                if (role is null)
+                if (channel is null)
                 {
                     return QueryResult<Model>.NotFound();
                 }
 
+                _context.Channels.Remove(channel);
+                await _context.SaveChangesAsync();
+
                 return QueryResult<Model>.Success(new Model()
                 {
-                    Id = role.Id,
-                    Name = role.Name,
-                    GuildId = role.GuildId,
-                    IsAssignable = role.IsAssignable ?? false
+                    Id = channel.Id,
+                    Name = channel.Name
                 });
             }
         }

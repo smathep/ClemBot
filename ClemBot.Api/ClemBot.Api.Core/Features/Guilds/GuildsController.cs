@@ -46,7 +46,8 @@ namespace ClemBot.Api.Core.Features.Guilds
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
-                _ => Ok(new List<ulong>())
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
             };
 
         [HttpPost]
@@ -84,12 +85,40 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => NotFound()
             };
 
-        [HttpPatch("Update")]
-        public async Task<IActionResult> Edit(Update.Command command) =>
-            await _mediator.Send(command) switch
+        [HttpPatch("{Id}/Update/Users")]
+        public async Task<IActionResult> UpdateUsers(ulong Id, UpdateUsers.Command command) =>
+            await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
-                _ => NotFound()
+                { Status: QueryStatus.NotFound} => NotFound(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpPatch("{Id}/Update/Roles")]
+        public async Task<IActionResult> UpdateRoles(ulong Id, UpdateRoles.Command command) =>
+            await _mediator.Send(command with { Id = Id }) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound} => NotFound(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpPatch("{Id}/Update/Channels")]
+        public async Task<IActionResult> UpdateChannels(ulong Id, UpdateChannels.Command command) =>
+            await _mediator.Send(command with { Id = Id }) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound} => NotFound(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpGet("{Id}/Roles")]
+        public async Task<IActionResult> Roles([FromRoute] Roles.Query query) =>
+            await _mediator.Send(query) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
             };
     }
 }

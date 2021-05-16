@@ -16,6 +16,14 @@ class UserRoute(BaseRoute):
         }
         await self.client.post('users', data=json)
 
+    async def get_user(self, user_id: int):
+        user = await self.client.get(f'users/{user_id}')
+
+        if user.status != 200:
+            return
+
+        return user.value
+
     async def add_user_guild(self, user_id: int, guild_id: int):
         json = {
             'GuildId': guild_id,
@@ -37,6 +45,14 @@ class UserRoute(BaseRoute):
             return
 
         return [g.id for g in user.value['Guilds']]
+
+    async def edit_user(self, user_id: int, name: str):
+        json = {
+            'id': user_id,
+            'name': name,
+        }
+
+        await self.client.patch('users/edit', data=json)
 
     async def get_users_ids(self) -> t.Optional[t.List[int]]:
         users = await self.client.get(f'users')

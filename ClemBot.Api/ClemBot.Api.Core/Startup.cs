@@ -62,7 +62,7 @@ namespace ClemBot.Api.Core
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClemBot.Api 1.0.0"));
             }
-            app.UseSerilogRequestLogging(); // <-- Add this line
+            app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
 
@@ -70,7 +70,7 @@ namespace ClemBot.Api.Core
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
 
             // Apply any new migrations
             context.Database.Migrate();

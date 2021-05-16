@@ -6,15 +6,15 @@ using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ClemBot.Api.Core.Features.Roles
+namespace ClemBot.Api.Core.Features.Channels
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RolesController : ControllerBase
+    public class ChannelsController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public RolesController(IMediator mediator)
+        public ChannelsController(IMediator mediator)
         {
             _mediator = mediator;
         }

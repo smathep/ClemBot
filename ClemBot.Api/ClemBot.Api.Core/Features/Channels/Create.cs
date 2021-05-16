@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -10,49 +10,49 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Guilds
+namespace ClemBot.Api.Core.Features.Channels
 {
-    public class RemoveUser
+    public class Create
     {
         public class Validator : AbstractValidator<Command>
         {
             public Validator()
             {
-                RuleFor(p => p.GuildId).NotNull();
-                RuleFor(p => p.UserId).NotNull();
+                RuleFor(p => p.Id).NotNull();
+                RuleFor(p => p.Name).NotNull();
             }
         }
 
         public class Command : IRequest<Result<ulong, QueryStatus>>
 
         {
+            public ulong Id { get; set; }
+
+            public string Name { get; set; } = null!;
+
             public ulong GuildId { get; set; }
-            public ulong UserId { get; set; }
         }
 
         public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
         {
             public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var guild = await _context.Guilds
-                    .Where(x => x.Id == request.GuildId)
-                    .Include(y => y.Users)
-                    .FirstOrDefaultAsync();
-
-                var user = await _context.Users
-                    .Where(x => x.Id == request.UserId)
-                    .Include(y => y.Guilds)
-                    .FirstOrDefaultAsync();
-
-                if (!guild.Users.Contains(user))
+                var channel = new Channel()
                 {
-                    return QueryResult<ulong>.NotFound();
+                    Id = request.Id,
+                    Name = request.Name,
+                    GuildId = request.GuildId
+                };
+
+                if (await _context.Channels.Where(x => x.Id == channel.Id).AnyAsync())
+                {
+                    return QueryResult<ulong>.Conflict();
                 }
 
-                guild.Users.Remove(user);
+                _context.Channels.Add(channel);
                 await _context.SaveChangesAsync();
 
-                return QueryResult<ulong>.Success(guild.Id);
+                return QueryResult<ulong>.Success(channel.Id);
             }
         }
     }

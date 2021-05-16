@@ -15,7 +15,7 @@ import bot.extensions as ext
 import bot.services as services
 from api.api_client import ApiClient
 import bot_secrets
-from api import guild_route, user_route
+from api import *
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
 from bot.data.claims_repository import ClaimsRepository
 from bot.data.database import Database
@@ -47,6 +47,8 @@ class ClemBot(commands.Bot):
 
         self.guild_route: guild_route.GuildRoute = None
         self.user_route: user_route.UserRoute = None
+        self.role_route: role_route.RoleRoute = None
+        self.channel_route: channel_route.ChannelRoute = None
 
         self.load_cogs()
         self.active_services = {}

@@ -18,14 +18,24 @@ class UserHandlingService(BaseService):
         super().__init__(bot)
 
     @BaseService.Listener(Events.on_user_joined)
-    async def on_user_joined(self, user) -> None:
+    async def on_user_joined(self, user: discord.Member) -> None:
         log.info(f'"{user.name}:{user.id}" has joined guild "{user.guild.name}:{user.guild.id}"')
         await self.add_user(user, user.guild.id)
+
+        db_user = await self.bot.user_route.get_user(user.id)
+        if not db_user:
+            await self.bot.user_route.create_user(user.id, user.name)
+
+        await self.bot.user_route.add_user_guild(user.id, user.guild.id)
+
         await self.notify_user_join(user)
 
     @BaseService.Listener(Events.on_user_removed)
     async def on_user_removed(self, user) -> None:
         log.info(f'"{user.name}:{user.id}" has left guild "{user.guild.name}:{user.guild.id}"')
+
+        await self.bot.user_route.remove_user_guild(user.id, user.guild.id)
+
         await self.notify_user_remove(user)
 
     @BaseService.Listener(Events.on_new_guild_initialized)

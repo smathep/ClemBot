@@ -48,7 +48,7 @@ class ApiClient:
         log.info(f'HTTP {http_type} Request initializing to route: {endpoint}')
         if 'data' in kwargs:
             data = json.dumps(kwargs['data'], indent=2)
-            log.info(f'HTTP {http_type} data found:\n{data}')
+            log.info(f'HTTP {http_type} data found {data}')
             kwargs['data'] = data
 
         async with self.session.request(http_type,
@@ -57,7 +57,7 @@ class ApiClient:
                                         **kwargs
                                         ) as resp:
             if resp.status != 200:
-                log.info('HTTP Request returned non 200 status')
+                log.warning(f'HTTP Request at endpoint {endpoint} returned {resp.status} status')
                 return Result(resp.status, None)
 
             res = Result(resp.status, await resp.json())

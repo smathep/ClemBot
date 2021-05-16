@@ -17,20 +17,24 @@ class RoleHandlingService(BaseService):
     @BaseService.Listener(Events.on_guild_role_create)
     async def on_role_create(self, role):
         await RoleRepository().add_or_update_role(role, role.guild.id)
+        await self.bot.role_route.create_role(role.id, role.name, role.guild.id)
 
     @BaseService.Listener(Events.on_new_guild_initialized)
     async def on_new_guild_init(self, guild: discord.Guild):
         await self.insert_roles(guild)
+        await self.bot.guild_route.update_guild_users(guild.id, guild.name, guild.roles)
 
     @BaseService.Listener(Events.on_guild_role_delete)
     async def on_role_delete(self, role):
         log.info(f'Role: {role.id} deleted in guild: {role.guild.id}')
         await RoleRepository().delete_role(role.id)
+        await self.bot.role_route.remove_role(role.id)
 
     @BaseService.Listener(Events.on_guild_role_update)
-    async def on_role_update(self, before, after):
+    async def on_role_update(self, before, after: discord.Role):
         log.info(f'Role: {after.id} updated in guild: {after.guild.id}')
         await RoleRepository().add_or_update_role(after, after.guild.id)
+        await self.bot.role_route.edit_role(after.id, after.name)
 
     async def insert_roles(self, guild: discord.Guild):
         log.info(f'Loading Roles from {guild.name}')

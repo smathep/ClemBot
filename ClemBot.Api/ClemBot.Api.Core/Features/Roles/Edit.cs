@@ -36,7 +36,6 @@ namespace ClemBot.Api.Core.Features.Roles
                 var role = await _context.Roles
                    .FirstOrDefaultAsync(g => g.Id == request.Id);
 
-
                 if (role is null)
                 {
                     return QueryResult<ulong>.NotFound();

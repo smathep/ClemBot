@@ -33,7 +33,7 @@ namespace ClemBot.Api.Core.Features.Users
                 var user = await _context.Users
                     .Where(x => x.Id == request.Id)
                     .Include(y => y.Guilds)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
 
                 if (user is null)
                 {

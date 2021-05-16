@@ -8,7 +8,7 @@ using ClemBot.Api.Data.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Roles
+namespace ClemBot.Api.Core.Features.Channels
 {
     public class Details
     {
@@ -32,21 +32,20 @@ namespace ClemBot.Api.Core.Features.Roles
         {
             public async Task<Result<Model, QueryStatus>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var role = await _context.Roles
+                var channel = await _context.Channels
                     .Where(x => x.Id == request.Id)
                     .FirstAsync();
 
-                if (role is null)
+                if (channel is null)
                 {
                     return QueryResult<Model>.NotFound();
                 }
 
                 return QueryResult<Model>.Success(new Model()
                 {
-                    Id = role.Id,
-                    Name = role.Name,
-                    GuildId = role.GuildId,
-                    IsAssignable = role.IsAssignable ?? false
+                    Id = channel.Id,
+                    Name = channel.Name,
+                    GuildId = channel.GuildId
                 });
             }
         }

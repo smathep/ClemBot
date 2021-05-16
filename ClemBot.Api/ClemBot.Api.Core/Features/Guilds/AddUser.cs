@@ -36,12 +36,12 @@ namespace ClemBot.Api.Core.Features.Guilds
                 var guild = await _context.Guilds
                     .Where(x => x.Id == request.GuildId)
                     .Include(y => y.Users)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
 
                 var user = await _context.Users
                     .Where(x => x.Id == request.UserId)
                     .Include(y => y.Guilds)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
 
                 if (guild.Users.Contains(user))
                 {

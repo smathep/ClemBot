@@ -6,7 +6,7 @@ namespace ClemBot.Api.Data.Models
 
         public string Name { get; set; }
 
-        public bool? IsAssignable { get; set; }
+        public bool? IsAssignable { get; set; } = false;
 
         public ulong GuildId { get; set; }
         public Guild Guild { get; set; }

@@ -1,8 +1,6 @@
 import asyncio
 import logging
 
-import discord
-
 from bot.services.base_service import BaseService
 
 log = logging.getLogger(__name__)
@@ -31,30 +29,59 @@ class StartupService(BaseService):
         new_users = [u for u in self.bot.users if u.id not in db_users]
         tasks = []
         for user in new_users:
-            log.info('hi')
-            tasks.append(await self.bot.user_route.create_user(user.id, user.name))
+            log.info(f'Creating new User {StartupService.get_full_name(user)}: {user.id}')
+            tasks.append(asyncio.create_task(self.bot.user_route.create_user(user.id, user.name)))
+
         await asyncio.gather(*tasks)
 
     async def load_users_guilds(self):
         tasks = []
         for guild in self.bot.guilds:
-            user_ids = [u.id for u in guild.members]
-            tasks.append(asyncio.create_task(self.bot.guild_route.update_guild(guild.id, guild.name, user_ids)))
+            log.info(f'Reloading guild {guild.name}: {guild.id} internal User state')
+            users = [{'id': u.id, 'name': u.name} for u in guild.members]
+            tasks.append(asyncio.create_task(self.bot.guild_route.update_guild_users(guild.id, guild.name, users)))
 
         await asyncio.gather(*tasks)
 
-    def get_full_name(self, author) -> str:
+    async def load_roles(self):
+        tasks = []
+        for g in self.bot.guilds:
+            tasks.append(asyncio.create_task(self.bot.guild_route.update_guild_roles(g.id, g.roles)))
+
+        await asyncio.gather(*tasks)
+
+    async def load_channels(self):
+        tasks = []
+        for g in self.bot.guilds:
+            tasks.append(asyncio.create_task(self.bot.guild_route.update_guild_channels(g.id, g.channels)))
+
+        await asyncio.gather(*tasks)
+
+    @staticmethod
+    def get_full_name(author) -> str:
         return f'{author.name}#{author.discriminator}'
 
     async def load_service(self):
+
+        log.info('Starting bot startup internal state reset')
+
         # First load any new guilds so that we can reference them
+        log.info('Resetting Guilds')
         await self.load_guilds()
 
         # Load new users, this will pull known users and compare to current users and only add the new ones
+        log.info('Resetting Users')
         await self.load_users()
 
         # Load user guild relationships, takes every guild and sends a complete list of users to the backend
         # to replace the current known state
+        log.info('Resetting User_Guilds state')
         await self.load_users_guilds()
 
+        # Reset active roles, send all roles to the backend and delete any not present and add any that are new
+        log.info('Resetting Guild Roles state')
+        await self.load_roles()
 
+        # Reset active channels, send all channels to the backend and delete any not present and add any that are new
+        log.info('Resetting Guild Channels state')
+        await self.load_channels()

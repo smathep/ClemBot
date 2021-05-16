@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,9 +8,9 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Guilds
+namespace ClemBot.Api.Core.Features.Channels
 {
-    public class Update
+    public class Edit
     {
         public class Validator : AbstractValidator<Command>
         {
@@ -21,45 +18,34 @@ namespace ClemBot.Api.Core.Features.Guilds
             {
                 RuleFor(p => p.Id).NotNull();
                 RuleFor(p => p.Name).NotNull();
-                RuleFor(p => p.Users).NotEmpty();
             }
         }
 
         public class Command : IRequest<Result<ulong, QueryStatus>>
+
         {
             public ulong Id { get; set; }
 
             public string Name { get; set; } = null!;
-
-            public List<ulong> Users { get; set; } = new();
         }
 
         public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
         {
             public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var guild = await _context.Guilds
-                    .Where(x => x.Id == request.Id)
-                    .Include(y => y.Users)
-                    .FirstOrDefaultAsync();
+                var channel = await _context.Channels
+                   .FirstOrDefaultAsync(g => g.Id == request.Id);
 
-                if (guild is null)
+                if (channel is null)
                 {
                     return QueryResult<ulong>.NotFound();
                 }
 
-                guild.Name = request.Name;
-
-                var users = await _context.Users
-                    .Where(x => request.Users.Contains(x.Id))
-                    .ToListAsync();
-
-                guild.Users = users;
+                channel.Name = request.Name;
                 await _context.SaveChangesAsync();
 
-                return QueryResult<ulong>.Success(guild.Id);
+                return QueryResult<ulong>.Success(channel.Id);
             }
-
         }
     }
 }
