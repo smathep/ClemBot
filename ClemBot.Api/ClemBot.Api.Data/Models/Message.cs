@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ClemBot.Api.Data.Models
 {
@@ -6,9 +7,7 @@ namespace ClemBot.Api.Data.Models
     {
         public ulong Id { get; set; }
 
-        public string Content { get; set; }
-
-        public DateTime Time { get; set; }
+        public List<MessageContent> Contents { get; set; } = new();
 
         public ulong GuildId { get; set; }
         public Guild Guild { get; set; }

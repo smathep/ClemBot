@@ -38,8 +38,7 @@ class StartupService(BaseService):
         tasks = []
         for guild in self.bot.guilds:
             log.info(f'Reloading guild {guild.name}: {guild.id} internal User state')
-            users = [{'id': u.id, 'name': u.name} for u in guild.members]
-            tasks.append(asyncio.create_task(self.bot.guild_route.update_guild_users(guild.id, guild.name, users)))
+            tasks.append(asyncio.create_task(self.bot.guild_route.update_guild_users(guild.id, guild.members)))
 
         await asyncio.gather(*tasks)
 

@@ -4,7 +4,7 @@ namespace ClemBot.Api.Data.Models
 {
     public class TagUse
     {
-        public ulong Id { get; set; }
+        public int Id { get; set; }
 
         public DateTime Time { get; set; }
 

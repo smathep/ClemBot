@@ -4,7 +4,7 @@ namespace ClemBot.Api.Data.Models
 {
     public class ClaimsMapping
     {
-        public ulong Id { get; set; }
+        public int Id { get; set; }
 
         public Claims Claim { get; set; }
 

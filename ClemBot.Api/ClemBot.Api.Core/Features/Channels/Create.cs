@@ -24,7 +24,6 @@ namespace ClemBot.Api.Core.Features.Channels
         }
 
         public class Command : IRequest<Result<ulong, QueryStatus>>
-
         {
             public ulong Id { get; set; }
 

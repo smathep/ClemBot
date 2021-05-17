@@ -21,8 +21,8 @@ class GuildHandlingService(BaseService):
 
         await GuildRepository().add_guild(guild)
         await self.bot.guild_route.add_guild(guild.id, guild.name)
-        users = [{'id': u.id, 'name': u.name} for u in guild.members]
-        await self.bot.guild_route.update_guild_users(guild.id, guild.name, users)
+
+        await self.bot.guild_route.update_guild_users(guild.id, guild.members)
 
         # The guild has been initialized, broadcast this to the rest
         # of the services

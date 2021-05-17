@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,50 +9,50 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Guilds
+namespace ClemBot.Api.Core.Features.Messages
 {
-    public class RemoveUser
+    public class Edit
     {
         public class Validator : AbstractValidator<Command>
         {
             public Validator()
             {
-                RuleFor(p => p.GuildId).NotNull();
-                RuleFor(p => p.UserId).NotNull();
+                RuleFor(p => p.Id).NotNull();
+                RuleFor(p => p.Content).NotNull();
             }
         }
 
         public class Command : IRequest<Result<ulong, QueryStatus>>
         {
-            public ulong GuildId { get; set; }
+            public ulong Id { get; set; }
 
-            public ulong UserId { get; set; }
+            public string Content { get; set; } = null!;
         }
 
         public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
         {
             public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var guild = await _context.Guilds
-                    .Where(x => x.Id == request.GuildId)
-                    .Include(y => y.Users)
-                    .FirstOrDefaultAsync();
+                var message = await _context.Messages
+                   .FirstOrDefaultAsync(g => g.Id == request.Id);
 
-                var user = await _context.Users
-                    .Where(x => x.Id == request.UserId)
-                    .Include(y => y.Guilds)
-                    .FirstOrDefaultAsync();
-
-                if (!guild.Users.Contains(user))
+                if (message is null)
                 {
                     return QueryResult<ulong>.NotFound();
                 }
 
-                guild.Users.Remove(user);
+                message.Contents.Add(new MessageContent()
+                {
+                    MessageId = message.Id,
+                    Content = request.Content,
+                    Time = DateTime.UtcNow
+                });
+
                 await _context.SaveChangesAsync();
 
-                return QueryResult<ulong>.Success(guild.Id);
+                return QueryResult<ulong>.Success(message.Id);
             }
+
         }
     }
 }

@@ -31,6 +31,12 @@ class MessageHandlingService(BaseService):
 
         await MessageRepository().add_message(message, datetime.datetime.utcnow())
 
+        await self.bot.message_route.create_message(message.id,
+                                                    message.content,
+                                                    message.guild.id,
+                                                    message.author.id,
+                                                    message.channel.id)
+
     @BaseService.Listener(Events.on_dm_message_received)
     async def on_dm_message_received(self, message: discord.Message) -> None:
         embed = discord.Embed(title=f'Bot Direct Message',
@@ -48,6 +54,7 @@ class MessageHandlingService(BaseService):
             {self.get_full_name(before.author)} \nBefore: {before.content} \nAfter: {after.content}')
 
         await MessageRepository().edit_message_content(after.id, after.content)
+        await self.bot.message_route.edit_message(after.id, after.content)
 
         embed = discord.Embed(title=f':repeat: **Message Edited in #{before.channel.name}**', color=Colors.ClemsonOrange)
         embed.add_field(name=f'Message Link', value=f'[Click Here]({after.jump_url})')
@@ -73,14 +80,16 @@ class MessageHandlingService(BaseService):
 
         message_repo = MessageRepository()
         message = await message_repo.get_message(payload.message_id)
+        message = await self.bot.message_route.get_message(payload.message_id)
         channel = self.bot.get_channel(payload.channel_id)
 
         try:
             if message is not None:
                 log.info(f'Uncached message edited in #{channel.name} By: \
-                    {message["fk_authorId"]} \nBefore: {message["content"]} \nAfter: {payload.data["content"]}')
+                    {message["userId"]} \nBefore: {message["content"]} \nAfter: {payload.data["content"]}')
 
                 await message_repo.edit_message_content(message['id'], payload.data['content'])
+                await self.bot.message_route.edit_message(message['id'], payload.data['content'])
 
                 embed = discord.Embed(title=f':repeat: **Uncached message edited in #{channel.name}**',
                                       color=Colors.ClemsonOrange)
@@ -103,7 +112,7 @@ class MessageHandlingService(BaseService):
             else:
                 try:
                     log.info(f'Uncached message edited in #{channel.name} By: \
-                        {payload.data["author"]["id"]} \nBefore: Unknown Content \nAfter: {payload.data["content"]}')
+                        {payload.data["author"]["id"]} \nBefore: Unknown Content \nAfter: {payload.data["Content"]}')
                 except KeyError:
                     log.error(json.dumps(payload.data))
 
@@ -151,6 +160,7 @@ class MessageHandlingService(BaseService):
 
         message_repo = MessageRepository()
         message = await message_repo.get_message(payload.message_id)
+        message = await self.bot.message_route.get_message(payload.message_id)
         channel = self.bot.get_channel(payload.channel_id)
 
         log.info(f'Uncached message deleted id:{payload.message_id} in #{channel.name}')

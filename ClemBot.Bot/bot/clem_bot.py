@@ -49,6 +49,7 @@ class ClemBot(commands.Bot):
         self.user_route: user_route.UserRoute = None
         self.role_route: role_route.RoleRoute = None
         self.channel_route: channel_route.ChannelRoute = None
+        self.message_route: message_route.MessageRoute = None
 
         self.load_cogs()
         self.active_services = {}

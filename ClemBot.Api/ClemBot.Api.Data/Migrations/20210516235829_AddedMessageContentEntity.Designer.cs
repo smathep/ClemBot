@@ -4,15 +4,17 @@ using ClemBot.Api.Data.Contexts;
 using ClemBot.Api.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ClemBot.Api.Data.Migrations
 {
     [DbContext(typeof(ClemBotContext))]
-    partial class ClemBotContextModelSnapshot : ModelSnapshot
+    [Migration("20210516235829_AddedMessageContentEntity")]
+    partial class AddedMessageContentEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,10 +46,9 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.ClaimsMapping", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<Claims>("Claim")
                         .HasColumnType("claims");
@@ -64,10 +65,9 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.CustomPrefix", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
@@ -84,10 +84,9 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.DesignatedChannelMapping", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ChannelId")
                         .HasColumnType("numeric(20,0)");
@@ -121,10 +120,9 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Infraction", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("numeric(20,0)");
@@ -189,10 +187,9 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.MessageContent", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Content")
                         .HasColumnType("text");
@@ -212,10 +209,9 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Reminder", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Link")
                         .HasColumnType("text");
@@ -264,10 +260,9 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Tag", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Content")
                         .HasColumnType("text");
@@ -295,19 +290,15 @@ namespace ClemBot.Api.Data.Migrations
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.TagUse", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ChannelId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("TagId")
                         .HasColumnType("numeric(20,0)");
-
-                    b.Property<int?>("TagId1")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
                         .HasColumnType("timestamp without time zone");
@@ -319,7 +310,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("ChannelId");
 
-                    b.HasIndex("TagId1");
+                    b.HasIndex("TagId");
 
                     b.HasIndex("UserId");
 
@@ -523,7 +514,9 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasOne("ClemBot.Api.Data.Models.Tag", "Tag")
                         .WithMany("TagUses")
-                        .HasForeignKey("TagId1");
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ClemBot.Api.Data.Models.User", "User")
                         .WithMany()

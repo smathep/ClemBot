@@ -4,7 +4,7 @@ namespace ClemBot.Api.Data.Models
 {
     public class DesignatedChannelMapping
     {
-        public ulong Id { get; set; }
+        public int Id { get; set; }
 
         public DesignatedChannels Type { get; set; }
 

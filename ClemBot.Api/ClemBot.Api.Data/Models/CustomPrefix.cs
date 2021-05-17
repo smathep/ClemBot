@@ -2,7 +2,7 @@ namespace ClemBot.Api.Data.Models
 {
     public class CustomPrefix
     {
-        public ulong Id { get; set; }
+        public int Id { get; set; }
 
         public string Prefix { get; set; }
 

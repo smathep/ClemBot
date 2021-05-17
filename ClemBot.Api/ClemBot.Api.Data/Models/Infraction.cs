@@ -5,7 +5,7 @@ namespace ClemBot.Api.Data.Models
 {
     public class Infraction
     {
-        public ulong Id { get; set; }
+        public int Id { get; set; }
 
         public InfractionType Type { get; set; }
 

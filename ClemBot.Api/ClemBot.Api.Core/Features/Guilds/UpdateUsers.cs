@@ -19,9 +19,7 @@ namespace ClemBot.Api.Core.Features.Guilds
         {
             public Validator()
             {
-                RuleFor(p => p.Id)
-                    .NotNull()
-                    .NotEqual((ulong)0);
+                RuleFor(p => p.Id).NotNull();
                 RuleFor(p => p.Users).NotEmpty();
             }
         }
@@ -56,7 +54,7 @@ namespace ClemBot.Api.Core.Features.Guilds
 
                 foreach (var user in request.Users)
                 {
-                    var dbUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
+                    var dbUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
 
                     if (dbUser is null)
                     {

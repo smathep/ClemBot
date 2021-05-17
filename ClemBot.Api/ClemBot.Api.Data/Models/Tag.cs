@@ -5,7 +5,7 @@ namespace ClemBot.Api.Data.Models
 {
     public class Tag
     {
-        public ulong Id { get; set; }
+        public int Id { get; set; }
 
         public string Name { get; set; }
 

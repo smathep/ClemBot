@@ -45,18 +45,22 @@ class GuildRoute(BaseRoute):
 
         return guild.value['users']
 
-
     async def edit_guild(self, guild_id: int, name: str):
         json = {
             'id': guild_id,
             'name': name,
         }
 
-        await self.client.patch('guilds/edit', data=json)
+        await self.client.patch('guilds', data=json)
 
-    async def update_guild_users(self, guild_id: int, name: str, users: t.List[t.Dict[t.Any, t.Any]]):
+    async def update_guild_users(self, guild_id: int, users: t.List[discord.Member]):
+        users = [{
+            'id': u.id,
+            'name': u.name
+        }
+            for u in users]
+
         json = {
-            'name': name,
             'users': users
         }
 
