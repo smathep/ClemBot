@@ -42,16 +42,19 @@ class TagCog(commands.Cog):
     )
     @ext.short_help('Supports custom tag functionality')
     @ext.example(('tag', 'tag mytag'))
-    async def tag(self, ctx, tag=None):
+    async def tag(self, ctx, tag_name=None):
         repo = TagRepository()
 
-        if tag:
-            if not await repo.check_tag_exists(tag, ctx.guild.id):
-                embed = discord.Embed(title=f'Error: Tag "{tag}" does not exist in this server', color=Colors.Error)
+        if tag_name:
+            tag = await self.bot.tag_route.get_tag(ctx.guild.id, tag_name)
+            if not tag:
+                embed = discord.Embed(title=f'Error: Tag "{tag_name}" does not exist in this server', color=Colors.Error)
                 return await ctx.send(embed=embed)
-            return await ctx.send(await repo.get_tag_content(tag, ctx.guild.id))
+            await self.bot.tag_route.add_tag_use(ctx.guild.id, tag_name, ctx.channel.id, ctx.author.id)
+            return await ctx.send(tag['content'])
 
         tags = await repo.get_all_server_tags(ctx.guild.id)
+        tags = await self.bot.tag_route.get_guilds_tags(ctx.guild.id)
 
         pages = []
         # check for if no tags exist in this server
@@ -74,10 +77,10 @@ class TagCog(commands.Cog):
                 while len(col) < 3:
                     col.append(' ')
 
-                # Cocatenate the formatted column string to the page content string
+                # Concatenate the formatted column string to the page content string
                 content += "{: <20} {: <20} {: <20}\n".format(*col)
 
-            # Apped the content string to the list of pages to send to the paginator
+            # Append the content string to the list of pages to send to the paginator
             # Marked as a code block to ensure a monospaced font and even columns
             pages.append(f'```{content}```')
 
@@ -126,6 +129,7 @@ class TagCog(commands.Cog):
 
         tag = Tag(name, content, datetime.utcnow(), ctx.guild.id, ctx.author.id)
         await TagRepository().insert_tag(tag)
+        await self.bot.tag_route.create_tag(name, content, ctx.guild.id, ctx.author.id)
 
         embed = discord.Embed(title=":white_check_mark: Tag successfully added", color=Colors.ClemsonOrange)
         embed.add_field(name="Name", value=name, inline=True)
@@ -148,14 +152,16 @@ class TagCog(commands.Cog):
         tag_repo = TagRepository()
         claims_repo = ClaimsRepository()
 
-        if not await tag_repo.check_tag_exists(name, ctx.guild.id):
+        tag = await self.bot.tag_route.get_tag(ctx.guild.id, name)
+
+        if not tag:
             embed = discord.Embed(title=f'Error: tag {name} does not exist', color=Colors.Error)
             await ctx.send(embed=embed)
             return
 
-        tag = await tag_repo.get_tag(name, ctx.guild.id)
+        # tag = await tag_repo.get_tag(name, ctx.guild.id)
 
-        if tag['fk_UserId'] == ctx.author.id:
+        if tag['userId'] == ctx.author.id:
             await self._delete_tag(name, ctx)
             return
 
@@ -181,30 +187,30 @@ class TagCog(commands.Cog):
 
         repo = TagRepository()
 
-        if not await repo.check_tag_exists(name, ctx.guild.id):
+        if not (tag := await self.bot.tag_route.get_tag(ctx.guild.id, name)):
             embed = discord.Embed(title=f'Error: Tag {name} does not exist', color=Colors.Error)
             await ctx.send(embed=embed)
             return
 
-        tag = await repo.get_tag(name, ctx.guild.id)
-
-        author = self.bot.get_user(tag['fk_UserId'])
+        author = self.bot.get_user(tag['userId'])
 
         embed = discord.Embed(title='Tag Information:', color=Colors.ClemsonOrange)
         embed.add_field(name='Name ', value=tag['name'])
         embed.add_field(name='Content ', value=tag['content'])
         embed.add_field(name='Uses ', value=tag['useCount'], inline=False)
-        fullNameGet = self.get_full_name(author)
-        embed.add_field(name='Creation Date: ', value=tag['CreationDate'], inline=False)
-        embed.set_footer(text=fullNameGet, icon_url=author.avatar_url)
+        full_name_get = self.get_full_name(author)
+        embed.add_field(name='Creation Date: ', value=tag['time'], inline=False)
+        embed.set_footer(text=full_name_get, icon_url=author.avatar_url)
 
         await ctx.send(embed=embed)
 
     async def _delete_tag(self, name, ctx):
-        repo = TagRepository()
-        content = await repo.get_tag_content(name, ctx.guild.id)
+        # repo = TagRepository()
+        # content = await repo.get_tag_content(name, ctx.guild.id)
+        content = await self.bot.tag_route.get_tag_content(ctx.guild.id, name)
 
-        await repo.delete_tag(name, ctx.guild.id)
+        # await repo.delete_tag(name, ctx.guild.id)
+        await self.bot.tag_route.delete_tag(ctx.guild.id, name)
 
         embed = discord.Embed(title=':white_check_mark: Tag successfully deleted', color=Colors.ClemsonOrange)
         embed.add_field(name='Name', value=name, inline=True)

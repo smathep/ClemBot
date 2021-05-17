@@ -19,6 +19,6 @@ namespace ClemBot.Api.Data.Models
         public ulong UserId { get; set; }
         public User User { get; set; }
 
-        public List<TagUse> TagUses { get; set; }
+        public List<TagUse> TagUses { get; set; } = new();
     }
 }

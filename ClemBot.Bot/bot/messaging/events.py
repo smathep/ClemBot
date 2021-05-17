@@ -475,5 +475,6 @@ class EventsMeta(type):
         """
         return 'on_member_ban'
 
+
 class Events(metaclass=EventsMeta):
     pass

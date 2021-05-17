@@ -120,5 +120,14 @@ namespace ClemBot.Api.Core.Features.Guilds
                 { Status: QueryStatus.NotFound } => NoContent(),
                 _ => throw new InvalidOperationException()
             };
+
+        [HttpGet("{Id}/Tags")]
+        public async Task<IActionResult> Tags([FromRoute] Tags.Query query) =>
+            await _mediator.Send(query) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
+            };
     }
 }
