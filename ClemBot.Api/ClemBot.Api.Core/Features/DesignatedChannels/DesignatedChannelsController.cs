@@ -21,24 +21,14 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
             _mediator = mediator;
         }
 
-        [HttpGet("bot/[controller]/{GuildId}/index")]
+        [HttpGet("bot/[controller]/{Designation}/index")]
         [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Index([FromRoute] Index.Query command) =>
-            await _mediator.Send(command) switch
-            {
-                {Status: QueryStatus.Success} result => Ok(result.Value),
-                _ => NoContent()
-            };
-
-        [HttpGet("bot/[controller]/{Designation}/global-index")]
-        [Authorize(Policy = Policies.BotMaster)]
-        public async Task<IActionResult> Index([FromRoute] GlobalIndex.Query command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => NoContent()
             };
-
 
         [HttpGet("bot/[controller]/details")]
         [Authorize(Policy = Policies.BotMaster)]

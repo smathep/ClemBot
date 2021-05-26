@@ -22,8 +22,6 @@ namespace ClemBot.Api.Core.Features.Messages.Bot
 
             public string Content { get; set; } = null!;
 
-            public DateTime Time { get; } = DateTime.UtcNow;
-
             public ulong GuildId { get; set; }
 
             public ulong ChannelId { get; set; }

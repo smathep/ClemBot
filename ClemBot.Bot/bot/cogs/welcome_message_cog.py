@@ -5,7 +5,6 @@ import discord.ext.commands as commands
 
 import bot.extensions as ext
 from bot.consts import Colors, Claims
-from bot.data.welcome_message_repository import WelcomeMessageRepository
 
 log = logging.getLogger(__name__)
 
@@ -23,8 +22,7 @@ class WelcomeMessageCog(commands.Cog):
     @ext.short_help('Set a server welcome dm message')
     @ext.example('welcome')
     async def welcome(self, ctx):
-        repo = WelcomeMessageRepository()
-        message = await repo.get_welcome_message(ctx.guild.id)
+        message = await self.bot.welcome_message_route.get_welcome_message(ctx.guild.id)
 
         if not message:
             embed = discord.Embed(title='Error: This server has no welcome message', color=Colors.Error)
@@ -41,8 +39,8 @@ class WelcomeMessageCog(commands.Cog):
     @ext.short_help('Sets the welcome message')
     @ext.example('welcome set welcome to our amazing server')
     async def set(self, ctx, *, content):
-        repo = WelcomeMessageRepository()
-        await repo.set_welcome_message(ctx.guild, content)
+        await self.bot.welcome_message_route.set_welcome_message(ctx.guild.id, content)
+
         embed = discord.Embed(title='Server welcome message set  :white_check_mark:', color=Colors.ClemsonOrange)
         await ctx.send(embed=embed)
 
@@ -54,15 +52,13 @@ class WelcomeMessageCog(commands.Cog):
     @ext.short_help('Removes the welcome message')
     @ext.example('welcome delete')
     async def delete(self, ctx):
-        repo = WelcomeMessageRepository()
-
-        message = await repo.get_welcome_message(ctx.guild.id)
+        message = await self.bot.welcome_message_route.get_welcome_message(ctx.guild.id)
         if not message:
             embed = discord.Embed(title='Error: This server has no welcome message', color=Colors.Error)
             await ctx.send(embed=embed)
             return
 
-        await repo.delete_welcome_message(ctx.guild)
+        await self.bot.welcome_message_route.set_welcome_message(ctx.guild.id, None)
         embed = discord.Embed(title='Server welcome message deleted  :white_check_mark:', color=Colors.ClemsonOrange)
         await ctx.send(embed=embed)
 

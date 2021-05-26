@@ -44,7 +44,7 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => NoContent()
             };
 
-        [HttpDelete("bot/[controller]{Id}")]
+        [HttpDelete("bot/[controller]/{Id}")]
         [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Delete([FromRoute] Bot.Delete.Query query) =>
             await _mediator.Send(query) switch
@@ -137,6 +137,46 @@ namespace ClemBot.Api.Core.Features.Guilds
         [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Tags([FromRoute] Bot.Tags.Query query) =>
             await _mediator.Send(query) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpGet("bot/[controller]/{Id}/DesignatedChannels")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Index([FromRoute] Bot.DesignatedChannels.Query command) =>
+            await _mediator.Send(command) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpPost("bot/[controller]/{Id}/SetWelcomeMessage")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> SetWelcomeMessage(ulong Id,[FromBody] Bot.SetWelcomeMessage.Command command) =>
+            await _mediator.Send(command with { Id = Id }) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpGet("bot/[controller]/{Id}/GetWelcomeMessage")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> GetWelcomeMessage([FromRoute] Bot.GetWelcomeMessage.Command command) =>
+            await _mediator.Send(command) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpGet("bot/[controller]/{Id}/DeleteWelcomeMessage")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> DeleteWelcomeMessage(ulong Id, Bot.DeleteWelcomeMessage.Command command) =>
+            await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 { Status: QueryStatus.NotFound } => NoContent(),

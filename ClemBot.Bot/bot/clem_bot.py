@@ -56,6 +56,7 @@ class ClemBot(commands.Bot):
         self.message_route: message_route.MessageRoute = None
         self.tag_route: tag_route.TagRoute = None
         self.designated_channel_route: designated_channel_route.DesignatedChannelRoute = None
+        self.welcome_message_route: welcome_message_route.WelcomeMessageRoute = None
 
         self.load_cogs()
         self.active_services = {}

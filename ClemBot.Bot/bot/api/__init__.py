@@ -6,4 +6,6 @@ __all__ = ['guild_route',
            'role_route',
            'message_route',
            'tag_route',
-           'designated_channel_route']
+           'designated_channel_route',
+           'welcome_message_route'
+           ]

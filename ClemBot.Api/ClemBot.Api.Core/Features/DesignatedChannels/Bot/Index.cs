@@ -11,34 +11,22 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels.Bot
 {
     public class Index
     {
-        public class Query : IRequest<Result<IEnumerable<Model>, QueryStatus>>
-        {
-            public ulong GuildId { get; set; }
-        }
-
-        public class Model
+        public class Query : IRequest<Result<IEnumerable<ulong>, QueryStatus>>
         {
             public Data.Enums.DesignatedChannels Designation { get; set; }
-
-            public IEnumerable<ulong> ChannelIds { get; set; } = new List<ulong>();
         }
 
         public record Handler(ClemBotContext _context) :
-            IRequestHandler<Query, Result<IEnumerable<Model>, QueryStatus>>
+            IRequestHandler<Query, Result<IEnumerable<ulong>, QueryStatus>>
         {
-            public async Task<Result<IEnumerable<Model>, QueryStatus>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<IEnumerable<ulong>, QueryStatus>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var designatedChannels = await _context.DesignatedChannelMappings
-                    .Where(x => x.Channel.Guild.Id == request.GuildId)
+                    .Where(x => x.Type == request.Designation)
+                    .Select(y => y.ChannelId)
                     .ToListAsync();
 
-                return QueryResult<IEnumerable<Model>>.Success(designatedChannels
-                    .GroupBy(y => y.Type)
-                    .Select(y => new Model()
-                    {
-                        Designation = y.Key,
-                        ChannelIds = y.Select(z => z.ChannelId)
-                    }));
+                return QueryResult<IEnumerable<ulong>>.Success(designatedChannels);
             }
        }
     }

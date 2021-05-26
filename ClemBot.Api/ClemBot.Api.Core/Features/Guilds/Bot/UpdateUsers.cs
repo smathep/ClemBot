@@ -45,6 +45,8 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                     .Include(y => y.Users)
                     .FirstOrDefaultAsync();
 
+                var users = await _context.Users.ToListAsync();
+
                 if (guild is null)
                 {
                     return QueryResult<ulong>.Conflict();
@@ -52,7 +54,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
 
                 foreach (var user in request.Users)
                 {
-                    var dbUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
+                    var dbUser = users.FirstOrDefault(x => x.Id == user.Id);
 
                     if (dbUser is null)
                     {
@@ -63,10 +65,8 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                         };
                         _context.Users.Add(userEntity);
                         guild.Users.Add(userEntity);
-                        continue;
                     }
-
-                    if (!guild.Users.Contains(dbUser))
+                    else if (!guild.Users.Contains(dbUser))
                     {
                         guild.Users.Add(dbUser);
                     }
