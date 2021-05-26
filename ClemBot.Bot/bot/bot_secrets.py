@@ -23,6 +23,7 @@ class BotSecrets:
         self._merriam_key = None
         self._azure_translate_key = None
         self._api_url = None
+        self._api_key = None
 
     @property
     def client_token(self) -> str:
@@ -201,6 +202,18 @@ class BotSecrets:
             raise ConfigAccessError(f'api_url has already been initialized')
         self._api_url = value
 
+    @property
+    def api_key(self) -> str:
+        if not self._api_key:
+            raise ConfigAccessError(f'api_key has not been initialized')
+        return self._api_key
+
+    @api_key.setter
+    def api_key(self, value: str) -> None:
+        if self._api_key:
+            raise ConfigAccessError(f'api_key has already been initialized')
+        self._api_key = value
+
     def load_development_secrets(self, lines: str) -> None:
         secrets = json.loads(lines)
 
@@ -217,6 +230,7 @@ class BotSecrets:
         self.geocode_key = secrets['GeocodeKey']
         self.azure_translate_key = secrets['AzureTranslateKey']
         self.api_url = secrets['ApiUrl']
+        self.api_key = secrets['ApiKey']
 
         log.info('Bot Secrets Loaded')
 
@@ -235,6 +249,7 @@ class BotSecrets:
         self.geocode_key = os.environ.get('GEOCODE_KEY')
         self.azure_translate_key = os.environ.get('AZURE_TRANSLATE_KEY')
         self.api_url = os.environ.get('API_URL')
+        self.api_key = os.environ.get('API_KEY')
 
         log.info('Production keys loaded')
 

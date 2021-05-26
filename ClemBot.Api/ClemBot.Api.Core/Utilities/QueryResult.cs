@@ -2,7 +2,7 @@ namespace ClemBot.Api.Core.Utilities
 {
     public static class QueryResult<T>
     {
-        public static Result<T, QueryStatus> Success(T? val=default)
+        public static Result<T, QueryStatus> Success(T? val = default)
             => new(val, QueryStatus.Success);
 
         public static Result<T, QueryStatus> NotFound()

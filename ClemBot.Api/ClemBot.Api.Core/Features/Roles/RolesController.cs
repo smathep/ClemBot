@@ -2,14 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Features.Roles.Bot;
+using ClemBot.Api.Core.Security;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Index = ClemBot.Api.Core.Features.Roles.Bot.Index;
 
 namespace ClemBot.Api.Core.Features.Roles
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class RolesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -19,7 +23,8 @@ namespace ClemBot.Api.Core.Features.Roles
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpGet("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Index() =>
             await _mediator.Send(new Index.Query()) switch
             {
@@ -27,7 +32,8 @@ namespace ClemBot.Api.Core.Features.Roles
                 _ => Ok(new List<ulong>())
             };
 
-        [HttpGet("{Id}")]
+        [HttpGet("bot/[controller]/{Id}")]
+        [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Details([FromRoute] Details.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -35,7 +41,8 @@ namespace ClemBot.Api.Core.Features.Roles
                 _ => NoContent()
             };
 
-        [HttpDelete("{Id}")]
+        [HttpDelete("bot/[controller]/{Id}")]
+        [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Delete([FromRoute] Delete.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -44,7 +51,8 @@ namespace ClemBot.Api.Core.Features.Roles
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPost]
+        [HttpPost("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Create(Create.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -53,7 +61,8 @@ namespace ClemBot.Api.Core.Features.Roles
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPatch]
+        [HttpPatch("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Edit(Edit.Command command) =>
             await _mediator.Send(command) switch
             {

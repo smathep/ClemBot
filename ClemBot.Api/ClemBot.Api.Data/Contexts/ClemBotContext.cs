@@ -26,6 +26,7 @@ namespace ClemBot.Api.Data.Contexts
         public DbSet<Guild> Guilds { get; set; }
         public DbSet<Infraction> Infractions { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageContent> MessageContents { get; set; }
         public DbSet<Reminder> Reminders { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Tag> Tags { get; set; }

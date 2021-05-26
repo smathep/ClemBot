@@ -3,8 +3,7 @@ from typing import Union, List
 
 import discord
 
-from bot.consts import DesignatedChannels, OwnerDesignatedChannels, DesignatedChannelBase
-from bot.data.designated_channel_repository import DesignatedChannelRepository
+from bot.consts import DesignatedChannels, DesignatedChannelBase
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
 
@@ -32,8 +31,7 @@ class DesignatedChannelService(BaseService):
             content (Union[str, discord.Embed]): The message to send
             dc_id [optional] (int) an optional callback id to associate sent dc messages at the publish site
         """
-        dc_repo = DesignatedChannelRepository()
-        assigned_channel_ids = await dc_repo.get_guild_designated_channels(designated_name.name, guild_id)
+        assigned_channel_ids = await self.bot.designated_channel_route.get_guild_designated_channel_ids(guild_id, designated_name.name)
 
         if assigned_channel_ids is None:
             return
@@ -55,19 +53,12 @@ class DesignatedChannelService(BaseService):
             designated_name (DesignatedChannels): The enum name of the designated channel
             content (Union[str, discord.Embed]): The message to send
         """
-        dc_repo = DesignatedChannelRepository()
-        assigned_channel_ids = await dc_repo.get_all_assigned_channels(designated_name.name)
+        assigned_channel_ids = await self.bot.designated_channel_route.get_global_designations(designated_name.name)
 
         if assigned_channel_ids is None:
             return
 
         await self._send_dc_messages(assigned_channel_ids, content)
-
-    @BaseService.Listener(Events.on_guild_channel_delete)
-    async def designated_channel_removed(self, channel):
-        repo = DesignatedChannelRepository()
-        if await repo.check_channel(channel):
-            await repo.remove_from_all_designated_channels(channel)
 
     async def _send_dc_messages(self, assigned_channel_ids: List[int], content: Union[str, discord.Embed]) -> List[int]:
         sent_messages = []
@@ -83,7 +74,4 @@ class DesignatedChannelService(BaseService):
         return sent_messages
 
     async def load_service(self):
-        repo = DesignatedChannelRepository()
-        for channel in list(DesignatedChannels) + list(OwnerDesignatedChannels):
-            log.info(f'Loading designated channel: {channel.name}')
-            await repo.add_designated_channel_type(channel.name)
+        pass

@@ -30,7 +30,7 @@ namespace ClemBot.Api.Core
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Host terminated unexpectedly");
+                Log.Fatal(ex, "ClemBot.Api terminated unexpectedly");
                 return 1;
             }
             finally
@@ -42,7 +42,7 @@ namespace ClemBot.Api.Core
         public static IHostBuilder CreateHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
                 .UseSerilog()
-                .ConfigureAppConfiguration((hostingContext, config) => {
+                .ConfigureAppConfiguration((_, config) => {
                     config.AddUserSecrets<ClemBotContext>();
                     config.AddEnvironmentVariables();
 

@@ -207,7 +207,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("MessageContent");
+                    b.ToTable("MessageContents");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Reminder", b =>

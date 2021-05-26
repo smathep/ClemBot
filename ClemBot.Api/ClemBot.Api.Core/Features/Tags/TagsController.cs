@@ -1,15 +1,16 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Features.Tags;
+using ClemBot.Api.Core.Security;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClemBot.Api.Core.Features.Tags
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class TagsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -19,8 +20,9 @@ namespace ClemBot.Api.Core.Features.Tags
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(Create.Command command) =>
+        [HttpPost("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Create(Bot.Create.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -28,24 +30,27 @@ namespace ClemBot.Api.Core.Features.Tags
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPatch]
-        public async Task<IActionResult> Edit(Edit.Command command) =>
+        [HttpPatch("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Edit(Bot.Edit.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => NotFound()
             };
 
-        [HttpGet]
-        public async Task<IActionResult> Details(Details.Query query) =>
+        [HttpGet("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Details(Bot.Details.Query query) =>
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => NoContent()
             };
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete(Delete.Command command) =>
+        [HttpDelete("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Delete(Bot.Delete.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -53,8 +58,9 @@ namespace ClemBot.Api.Core.Features.Tags
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPost("invoke")]
-        public async Task<IActionResult> AddUse(Invoke.Command command) =>
+        [HttpPost("bot/[controller]/invoke")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> AddUse(Bot.Invoke.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),

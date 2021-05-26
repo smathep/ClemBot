@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Security;
 using ClemBot.Api.Data.Contexts;
 using FluentValidation.AspNetCore;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -14,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
@@ -35,22 +40,67 @@ namespace ClemBot.Api.Core
 
             services.AddControllers().AddFluentValidation(s => {
                 s.RegisterValidatorsFromAssemblyContaining<Startup>();
-            });
+            })
+                .AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+            var apiKey = Configuration["BotApiKey"];
+            services.AddSingleton(new ApiKey() { Key = apiKey });
+
+
+            var jwtTokenConfig = Configuration.GetSection("JwtTokenConfig").Get<JwtTokenConfig>();
+            jwtTokenConfig.Secret = Guid.NewGuid().ToString();
+            services.AddSingleton(jwtTokenConfig);
+
+            services.AddScoped<IJwtAuthManager, JwtAuthManager>();
             services.AddMediatR(typeof(Startup));
 
             services.AddSwaggerGen(o => {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "ClemBot.Api", Version = "1.0.0" });
+                o.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "ClemBot.Api",
+                    Version = "1.0.0",
+                    Description = "ClemBot Backend API Implementation",
+                    License = new OpenApiLicense()
+                    {
+                        Name = "Use under MIT",
+                        Url = new Uri("https://opensource.org/licenses/MIT")
+                    }
+                });
                 o.CustomSchemaIds(type => type.ToString());
             });
 
-            var connectionString = Environment.GetEnvironmentVariable("CLEMBOT_CONNECTION_STRING")
-                                       ?? Configuration["ClemBotConnectionString"];
+            var connectionString = Configuration["ClemBotConnectionString"];
 
             services.AddDbContext<ClemBotContext>(options =>
                 options.UseNpgsql(connectionString));
 
             services.AddHttpClient();
+            services.AddHttpContextAccessor();
+
+
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x => {
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = jwtTokenConfig.Issuer,
+                    ValidateIssuer = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtTokenConfig.Secret)),
+                    ValidAudience = jwtTokenConfig.Audience,
+                    ValidateAudience = true
+                };
+            }
+            );
+
+            services.AddAuthorization(options => {
+                options.AddPolicy(Policies.BotMaster, policy => {
+                    policy.RequireClaim(Claims.BotApiKeyClaim);
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +118,7 @@ namespace ClemBot.Api.Core
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());

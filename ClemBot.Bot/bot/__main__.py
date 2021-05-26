@@ -83,7 +83,6 @@ def main():
 
     # Create the api client for injection into the bot
     client = ApiClient()
-
     # set allowed mentions
     mentions = discord.AllowedMentions(everyone=False, roles=False)
 
@@ -91,7 +90,6 @@ def main():
     ClemBot(
         messenger=messenger,
         scheduler=scheduler,
-        api_client=client,
         command_prefix=custom_prefix.get_prefix,  # noqa: E126
         help_command=None,
         case_insensitive=True,

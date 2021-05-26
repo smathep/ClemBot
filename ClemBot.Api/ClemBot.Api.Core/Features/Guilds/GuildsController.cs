@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Features.Guilds;
+using ClemBot.Api.Core.Security;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -11,8 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace ClemBot.Api.Core.Features.Guilds
 {
     [ApiController]
-    [Route("api/[controller]")]
-    [AllowAnonymous]
+    [Route("api")]
     public class GuildsController : ControllerBase
     {
         private readonly ILogger<GuildsController> _logger;
@@ -25,24 +26,27 @@ namespace ClemBot.Api.Core.Features.Guilds
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpGet("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Index() =>
-            await _mediator.Send(new Index.Query()) switch
+            await _mediator.Send(new Bot.Index.Query()) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => Ok(new List<ulong>())
             };
 
-        [HttpGet("{Id}")]
-        public async Task<IActionResult> Details([FromRoute] Details.Query query) =>
+        [HttpGet("bot/[controller]/{id}")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Details([FromRoute] Bot.Details.Query query) =>
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => NoContent()
             };
 
-        [HttpDelete("{Id}")]
-        public async Task<IActionResult> Delete([FromRoute] Delete.Query query) =>
+        [HttpDelete("bot/[controller]{Id}")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Delete([FromRoute] Bot.Delete.Query query) =>
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -50,8 +54,9 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPost]
-        public async Task<IActionResult> Create(Create.Command command) =>
+        [HttpPost("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Create(Bot.Create.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -59,8 +64,9 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPost("AddUser")]
-        public async Task<IActionResult> AddUser(AddUser.Command command) =>
+        [HttpPost("bot/[controller]/AddUser")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> AddUser(Bot.AddUser.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -68,8 +74,9 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpDelete("RemoveUser")]
-        public async Task<IActionResult> RemoveUser(RemoveUser.Command command) =>
+        [HttpDelete("bot/[controller]/RemoveUser")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> RemoveUser(Bot.RemoveUser.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -77,43 +84,48 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPatch]
-        public async Task<IActionResult> Edit(Edit.Command command) =>
+        [HttpPatch("bot/[controller]")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Edit(Bot.Edit.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => NotFound()
             };
 
-        [HttpPatch("{Id}/Update/Users")]
-        public async Task<IActionResult> UpdateUsers(ulong Id, UpdateUsers.Command command) =>
+        [HttpPatch("bot/[controller]/{Id}/Update/Users")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> UpdateUsers(ulong Id, Bot.UpdateUsers.Command command) =>
             await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
-                { Status: QueryStatus.NotFound} => NotFound(),
+                { Status: QueryStatus.NotFound } => NotFound(),
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPatch("{Id}/Update/Roles")]
-        public async Task<IActionResult> UpdateRoles(ulong Id, UpdateRoles.Command command) =>
+        [HttpPatch("bot/[controller]/{Id}/Update/Roles")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> UpdateRoles(ulong Id, Bot.UpdateRoles.Command command) =>
             await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
-                { Status: QueryStatus.NotFound} => NotFound(),
+                { Status: QueryStatus.NotFound } => NotFound(),
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPatch("{Id}/Update/Channels")]
-        public async Task<IActionResult> UpdateChannels(ulong Id, UpdateChannels.Command command) =>
+        [HttpPatch("bot/[controller]/{Id}/Update/Channels")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> UpdateChannels(ulong Id, Bot.UpdateChannels.Command command) =>
             await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
-                { Status: QueryStatus.NotFound} => NotFound(),
+                { Status: QueryStatus.NotFound } => NotFound(),
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpGet("{Id}/Roles")]
-        public async Task<IActionResult> Roles([FromRoute] Roles.Query query) =>
+        [HttpGet("bot/[controller]/{Id}/Roles")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Roles([FromRoute] Bot.Roles.Query query) =>
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -121,8 +133,9 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpGet("{Id}/Tags")]
-        public async Task<IActionResult> Tags([FromRoute] Tags.Query query) =>
+        [HttpGet("bot/[controller]/{Id}/Tags")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Tags([FromRoute] Bot.Tags.Query query) =>
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),

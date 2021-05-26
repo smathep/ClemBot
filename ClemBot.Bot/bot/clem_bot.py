@@ -6,6 +6,7 @@ import traceback
 import typing as t
 from types import ModuleType
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -36,9 +37,12 @@ class ClemBot(commands.Bot):
     as well as the dynamic loading of services and cogs
     """
 
-    def __init__(self, messenger, scheduler, api_client, **kwargs):
+    def __init__(self, messenger, scheduler, **kwargs):
         # this super call is to pass the prefix up to the super class
         super().__init__(**kwargs)
+
+        # Create the api client and set its reconnect callback
+        self.api_client = ApiClient(self.on_reconnect)
 
         self.messenger: Messenger = messenger
         self.scheduler: Scheduler = scheduler
@@ -51,12 +55,12 @@ class ClemBot(commands.Bot):
         self.channel_route: channel_route.ChannelRoute = None
         self.message_route: message_route.MessageRoute = None
         self.tag_route: tag_route.TagRoute = None
+        self.designated_channel_route: designated_channel_route.DesignatedChannelRoute = None
 
         self.load_cogs()
         self.active_services = {}
 
-        self.load_routes(api_client)
-        a = 3
+        self.load_routes(self.api_client)
 
     async def on_ready(self) -> None:
         """
@@ -64,19 +68,34 @@ class ClemBot(commands.Bot):
         This is where services are loaded and the startup procedures for each service is run
         """
 
+        # Connect to the api Before the services are loaded so they can begin their startup routines
+        try:
+            await self.api_client.connect()
+        except aiohttp.client_exceptions.ClientConnectorError as e:
+            log.fatal(f'Request to ClemBot.Api Failed: No server found')
+            await self.api_client.close()
+            await self.logout()
+            return
+
         await self.change_presence(activity=discord.Game(name='Run !help'))
 
         await Database(bot_secrets.secrets.database_name).create_database()
         await self.load_services()
 
         # Send the ready event AFTER services have been loaded so that the designated channel service is there
-        embed = discord.Embed(title='Bot Ready', color=Colors.ClemsonOrange)
+        embed = discord.Embed(title='Bot Started Up  :white_check_mark:', color=Colors.ClemsonOrange)
         time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         embed.add_field(name='Startup Time', value=time)
         embed.set_thumbnail(url=self.user.avatar_url)
         await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
 
         log.info(f'Logged on as {self.user}')
+
+    async def on_reconnect(self):
+        embed = discord.Embed(title='Bot Reconnected to ClemBot.Api  :white_check_mark:', color=Colors.ClemsonOrange)
+        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
+        await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
 
     async def command_claims_check(self, ctx: commands.Context):
         """
@@ -121,7 +140,7 @@ class ClemBot(commands.Bot):
     async def close(self) -> None:
         try:
             log.info('Sending shutdown embed')
-            embed = discord.Embed(title='Bot Shutting down', color=Colors.ClemsonOrange)
+            embed = discord.Embed(title='Bot Shutting down  :white_check_mark:', color=Colors.ClemsonOrange)
             time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
             embed.add_field(name='Shutdown Time', value=time)
             embed.set_thumbnail(url=self.user.avatar_url)

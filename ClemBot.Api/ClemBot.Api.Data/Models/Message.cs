@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+
 namespace ClemBot.Api.Data.Models
 {
     public class Message

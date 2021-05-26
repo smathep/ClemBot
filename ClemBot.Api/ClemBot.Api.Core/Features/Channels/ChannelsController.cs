@@ -2,14 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Features.Channels.Bot;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Index = ClemBot.Api.Core.Features.Channels.Bot.Index;
 
 namespace ClemBot.Api.Core.Features.Channels
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class ChannelsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -19,7 +21,7 @@ namespace ClemBot.Api.Core.Features.Channels
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpGet("bot/[controller]")]
         public async Task<IActionResult> Index() =>
             await _mediator.Send(new Index.Query()) switch
             {
@@ -27,7 +29,7 @@ namespace ClemBot.Api.Core.Features.Channels
                 _ => Ok(new List<ulong>())
             };
 
-        [HttpGet("{Id}")]
+        [HttpGet("bot/[controller]/{Id}")]
         public async Task<IActionResult> Details([FromRoute] Details.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -35,7 +37,7 @@ namespace ClemBot.Api.Core.Features.Channels
                 _ => NoContent()
             };
 
-        [HttpDelete("{Id}")]
+        [HttpDelete("bot/[controller]/{Id}")]
         public async Task<IActionResult> Delete([FromRoute] Delete.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -44,7 +46,7 @@ namespace ClemBot.Api.Core.Features.Channels
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPost]
+        [HttpPost("bot/[controller]")]
         public async Task<IActionResult> Create(Create.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -53,7 +55,7 @@ namespace ClemBot.Api.Core.Features.Channels
                 _ => throw new InvalidOperationException()
             };
 
-        [HttpPatch]
+        [HttpPatch("bot/[controller]")]
         public async Task<IActionResult> Edit(Edit.Command command) =>
             await _mediator.Send(command) switch
             {
