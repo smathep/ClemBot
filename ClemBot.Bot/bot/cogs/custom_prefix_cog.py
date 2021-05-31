@@ -48,9 +48,7 @@ class CustomPrefixCog(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        repo = CustomPrefixesRepository()
-        await repo.set_prefix(ctx.guild.id, prefix)
-        await self.bot.messenger.publish(Events.on_set_custom_prefix, ctx.guild, prefix)
+        await self.bot.custom_prefix_route.set_custom_prefix(ctx.guild.id, prefix)
 
         embed = discord.Embed(color=Colors.ClemsonOrange)
         embed.add_field(name='Prefix changed   :white_check_mark:', value=f'New Prefix: ```{prefix}```')
@@ -64,7 +62,6 @@ class CustomPrefixCog(commands.Cog):
     @ext.short_help('resets a custom prefix')
     @ext.example('prefix set')
     async def reset(self, ctx):
-
         default_prefix = bot_secrets.secrets.bot_prefix
 
         if default_prefix in await self.bot.get_prefix(ctx.message):
@@ -73,10 +70,7 @@ class CustomPrefixCog(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        repo = CustomPrefixesRepository()
-
-        await repo.set_prefix(ctx.guild.id, default_prefix)
-        await self.bot.messenger.publish(Events.on_set_custom_prefix, ctx.guild, default_prefix)
+        await self.bot.custom_prefix_route.set_custom_prefix(ctx.guild.id, default_prefix)
 
         embed = discord.Embed(color=Colors.ClemsonOrange)
         embed.add_field(

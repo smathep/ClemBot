@@ -143,6 +143,16 @@ namespace ClemBot.Api.Core.Features.Guilds
                 _ => throw new InvalidOperationException()
             };
 
+        [HttpGet("bot/[controller]/{Id}/CustomPrefixes")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> Tags([FromRoute] Bot.CustomPrefixes.Query query) =>
+            await _mediator.Send(query) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
+                _ => throw new InvalidOperationException()
+            };
+
         [HttpGet("bot/[controller]/{Id}/DesignatedChannels")]
         [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Index([FromRoute] Bot.DesignatedChannels.Query command) =>
