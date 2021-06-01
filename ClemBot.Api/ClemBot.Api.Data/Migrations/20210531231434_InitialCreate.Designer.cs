@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ClemBot.Api.Data.Migrations
 {
     [DbContext(typeof(ClemBotContext))]
-    [Migration("20210520204625_InitialCreate")]
+    [Migration("20210531231434_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,8 +131,8 @@ namespace ClemBot.Api.Data.Migrations
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal?>("Duration")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<DateTime?>("Duration")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");

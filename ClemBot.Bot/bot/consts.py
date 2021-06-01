@@ -74,9 +74,9 @@ class DiscordLimits:
 
 
 class Infractions:
-    mute = 'mute'
-    ban = 'ban'
-    warn = 'warn'
+    mute = 'Mute'
+    ban = 'Ban'
+    warn = 'Warn'
 
 
 class Moderation:

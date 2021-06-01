@@ -16,12 +16,12 @@ class WelcomeMessageRoute(BaseRoute):
         json = {
             'Message': message
         }
-        return await self.client.post(f'guilds/{guild_id}/SetWelcomeMessage', data=json)
+        return await self._client.post(f'guilds/{guild_id}/SetWelcomeMessage', data=json)
 
     async def get_welcome_message(self, guild_id: int):
-        resp = await self.client.get(f'guilds/{guild_id}/GetWelcomeMessage')
+        resp = await self._client.get(f'guilds/{guild_id}/GetWelcomeMessage')
         return resp.value
 
     async def delete_welcome_message(self, guild_id: int):
-        resp = await self.client.delete(f'guilds/{guild_id}/GetWelcomeMessage')
+        resp = await self._client.delete(f'guilds/{guild_id}/GetWelcomeMessage')
         return resp.value

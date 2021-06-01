@@ -129,8 +129,8 @@ namespace ClemBot.Api.Data.Migrations
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal?>("Duration")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<DateTime?>("Duration")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");

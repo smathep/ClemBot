@@ -28,6 +28,6 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels.Bot
 
                 return QueryResult<IEnumerable<ulong>>.Success(designatedChannels);
             }
-       }
+        }
     }
 }

@@ -4,8 +4,7 @@ from datetime import datetime
 import discord
 
 from bot.clem_bot import ClemBot
-from bot.consts import Colors, DesignatedChannels, Moderation
-from bot.data.moderation_repository import ModerationRepository
+from bot.consts import Colors, DesignatedChannels, Moderation, Infractions
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
 
@@ -19,49 +18,54 @@ class ModerationService(BaseService):
 
     @BaseService.Listener(Events.on_bot_warn)
     async def on_bot_warn(self, guild, author: discord.Member, subject: discord.Member, reason):
-        repo = ModerationRepository()
-
-        await repo.insert_warn(guild_id=guild.id,
-                               author_id=author.id,
-                               subject_id=subject.id,
-                               reason=reason)
+        await self.bot.moderation_route.insert_warn(guild_id=guild.id,
+                                                    author_id=author.id,
+                                                    subject_id=subject.id,
+                                                    reason=reason)
 
     @BaseService.Listener(Events.on_bot_ban)
     async def on_bot_ban(self, guild, author: discord.Member, subject: discord.Member, reason):
-        repo = ModerationRepository()
 
         await guild.ban(subject, reason=reason, delete_message_days=1)
 
-        await repo.insert_ban(guild_id=guild.id,
-                              author_id=author.id,
-                              subject_id=subject.id,
-                              reason=reason)
+        await self.bot.moderation_route.insert_ban(guild_id=guild.id,
+                                                   author_id=author.id,
+                                                   subject_id=subject.id,
+                                                   reason=reason)
 
     @BaseService.Listener(Events.on_bot_mute)
     async def on_bot_mute(self, guild: discord.Guild, author: discord.Member, subject: discord.Member, reason, duration):
-        repo = ModerationRepository()
 
         mute_role = discord.utils.get(author.guild.roles, name=Moderation.mute_role_name)
         await subject.add_roles(mute_role)
 
-        mute_id = await repo.insert_mute(guild_id=guild.id,
-                                         author_id=author.id,
-                                         subject_id=subject.id,
-                                         duration=duration,
-                                         reason=reason)
+        mute_id = await self.bot.moderation_route.insert_mute(guild_id=guild.id,
+                                                              author_id=author.id,
+                                                              subject_id=subject.id,
+                                                              duration=duration.strftime('%Y-%m-%dT%H:%M:%S.%f'),
+                                                              reason=reason)
 
         self.bot.scheduler.schedule_at(self._unmute_callback(subject, mute_id), time=duration)
 
     @BaseService.Listener(Events.on_bot_unmute)
-    async def on_bot_unmute(self, guild: discord.Guild, subject: discord.Member, mute_id, reason):
-        repo = ModerationRepository()
+    async def on_bot_unmute(self,
+                            guild: discord.Guild,
+                            subject: discord.Member,
+                            mute_id: int,
+                            reason: str,
+                            author: discord.Member = None):
+
         mute_role = discord.utils.get(guild.roles, name=Moderation.mute_role_name)
+
+        if not author:
+            author = self.bot.user
+
+        await self.bot.moderation_route.deactivate_mute(mute_id)
 
         if mute_role not in subject.roles:
             return
 
         await subject.remove_roles(mute_role)
-        await repo.deactivate_mute(mute_id)
 
         embed = discord.Embed(color=Colors.ClemsonOrange)
         embed.title = f'You have been Unmuted'
@@ -82,6 +86,7 @@ class ModerationService(BaseService):
         embed = discord.Embed(color=Colors.ClemsonOrange)
         embed.title = 'Guild Member Unmuted'
         embed.add_field(name=self.get_full_name(subject), value=f'Id: {subject.id}')
+        embed.set_author(name=self.get_full_name(author), icon_url=author.avatar_url)
         embed.add_field(name='Reason :page_facing_up:', value=f'```{reason}```', inline=False)
         embed.set_thumbnail(url=subject.avatar_url_as(static_format='png'))
 
@@ -92,14 +97,14 @@ class ModerationService(BaseService):
 
     @BaseService.Listener(Events.on_user_joined)
     async def on_joined(self, user: discord.Member):
-        repo = ModerationRepository()
         mute_role = discord.utils.get(user.guild.roles, name=Moderation.mute_role_name)
 
         # no mute role configured, do nothing
         if not mute_role:
             return
 
-        mutes = await repo.get_all_active_mutes_member(user.guild.id, user.id)
+        mutes = await self.bot.moderation_route.get_guild_mutes_user(user.guild.id, user.id)
+        mutes = [mute for mute in mutes if mute.active]
 
         if len(mutes) > 0:
             await user.add_roles(mute_role)
@@ -158,13 +163,11 @@ class ModerationService(BaseService):
         return f'{author.name}#{author.discriminator}'
 
     async def load_service(self):
-        repo = ModerationRepository()
-
         for guild in self.bot.guilds:
-            mutes = await repo.get_all_active_mutes(guild.id)
-            for mute in mutes:
-                wait: datetime = datetime.strptime(mute.duration, '%Y-%m-%d %H:%M:%S.%f')
-                member = guild.get_member(mute.fk_subjectId)
+            mutes = await self.bot.moderation_route.get_guild_infractions(guild.id)
+            for mute in (m for m in mutes if m.type == Infractions.mute and m.active):
+                wait: datetime = datetime.strptime(mute.duration, '%Y-%m-%dT%H:%M:%S.%f')
+                member = guild.get_member(mute.subject_id)
 
                 if not member:
                     continue

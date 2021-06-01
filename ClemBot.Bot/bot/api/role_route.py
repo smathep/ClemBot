@@ -15,10 +15,10 @@ class RoleRoute(BaseRoute):
             'name': name,
             'guildId': guild_id
         }
-        await self.client.post('roles', data=json)
+        await self._client.post('roles', data=json)
 
     async def get_role(self, role_id: int):
-        user = await self.client.get(f'roles/{role_id}')
+        user = await self._client.get(f'roles/{role_id}')
 
         if user.status != 200:
             return
@@ -31,14 +31,13 @@ class RoleRoute(BaseRoute):
             'name': name,
         }
 
-        await self.client.patch('roles', data=json)
+        await self._client.patch('roles', data=json)
 
     async def remove_role(self, role_id: int):
-
-        await self.client.delete(f'roles/{role_id}')
+        await self._client.delete(f'roles/{role_id}')
 
     async def get_guilds_roles(self, guild_id: int) -> t.Optional[t.List[int]]:
-        users = await self.client.get(f'guilds/{guild_id}/roles')
+        users = await self._client.get(f'guilds/{guild_id}/roles')
 
         if users.status != 200:
             return

@@ -35,7 +35,7 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
         public async Task<IActionResult> Details(Details.Command command) =>
             await _mediator.Send(command) switch
             {
-                {Status: QueryStatus.Success} result => Ok(result.Value),
+                { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => NoContent()
             };
 
@@ -44,8 +44,8 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
         public async Task<IActionResult> Delete(Delete.Command query) =>
             await _mediator.Send(query) switch
             {
-                {Status: QueryStatus.Success} result => Ok(result.Value),
-                {Status: QueryStatus.NotFound} => NoContent(),
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NoContent(),
                 _ => throw new InvalidOperationException()
             };
 
@@ -54,8 +54,8 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
         public async Task<IActionResult> Register(Register.Command command) =>
             await _mediator.Send(command) switch
             {
-                {Status: QueryStatus.Success} result => Ok(result.Value),
-                {Status: QueryStatus.Conflict} => Conflict(),
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.Conflict } => Conflict(),
                 _ => throw new InvalidOperationException()
             };
     }

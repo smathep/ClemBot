@@ -19,7 +19,7 @@ class MessageRoute(BaseRoute):
             'UserId': author_id,
             'ChannelId': channel_id
         }
-        await self.client.post('messages', data=json)
+        await self._client.post('messages', data=json)
 
     async def edit_message(self, message_id: int, content: str):
         json = {
@@ -27,7 +27,7 @@ class MessageRoute(BaseRoute):
             'Content': content,
         }
 
-        await self.client.patch('messages', data=json)
+        await self._client.patch('messages', data=json)
 
     async def get_message(self, message_id: int):
-        return (await self.client.get(f'messages/{message_id}')).value
+        return (await self._client.get(f'messages/{message_id}')).value

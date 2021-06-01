@@ -18,7 +18,7 @@ class TagRoute(BaseRoute):
             'GuildId': guild_id,
             'UserId': user_id,
         }
-        await self.client.post('tags', data=json)
+        await self._client.post('tags', data=json)
 
     async def edit_tag(self, guild_id: int, name: str, content: str):
         json = {
@@ -26,28 +26,28 @@ class TagRoute(BaseRoute):
             'Name': name,
             'Content': content
         }
-        await self.client.patch('tags', data=json)
+        await self._client.patch('tags', data=json)
 
     async def get_tag(self, guild_id: int, name: str):
         json = {
             'GuildId': guild_id,
             'Name': name,
         }
-        return (await self.client.get('tags', data=json)).value
+        return (await self._client.get('tags', data=json)).value
 
     async def get_tag_content(self, guild_id: int, name: str):
         json = {
             'GuildId': guild_id,
             'Name': name,
         }
-        return (await self.client.get('tags', data=json)).value['content']
+        return (await self._client.get('tags', data=json)).value['content']
 
     async def delete_tag(self, guild_id: int, name: str):
         json = {
             'GuildId': guild_id,
             'Name': name,
         }
-        await self.client.delete('tags', data=json)
+        await self._client.delete('tags', data=json)
 
     async def add_tag_use(self, guild_id: int, name: str, channel_id: int, user_id: int):
         json = {
@@ -57,10 +57,10 @@ class TagRoute(BaseRoute):
             'UserId': user_id
         }
 
-        await self.client.post('tags/invoke', data=json)
+        await self._client.post('tags/invoke', data=json)
 
     async def get_guilds_tags(self, guild_id: int) -> t.Optional[t.List[int]]:
-        users = await self.client.get(f'guilds/{guild_id}/tags')
+        users = await self._client.get(f'guilds/{guild_id}/tags')
 
         if users.status != 200:
             return

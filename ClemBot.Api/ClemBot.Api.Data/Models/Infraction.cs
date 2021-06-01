@@ -13,7 +13,7 @@ namespace ClemBot.Api.Data.Models
 
         public bool? IsActive { get; set; }
 
-        public ulong? Duration { get; set; }
+        public DateTime? Duration { get; set; }
 
         public DateTime Time { get; set; }
 

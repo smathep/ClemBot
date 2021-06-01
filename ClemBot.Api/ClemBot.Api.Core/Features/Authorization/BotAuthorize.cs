@@ -42,7 +42,7 @@ namespace ClemBot.Api.Core.Features.Authorization
                 ApiKey _apiKey)
             : IRequestHandler<Query, Result<Model, AuthorizeStatus>>
         {
-            public async Task<Result<Model, AuthorizeStatus>> Handle(Query request,
+            public Task<Result<Model, AuthorizeStatus>> Handle(Query request,
                 CancellationToken cancellationToken)
             {
                 _httpContextAccessor.HttpContext!.Request.Headers.TryGetValue("Origin", out var origin);
@@ -50,7 +50,7 @@ namespace ClemBot.Api.Core.Features.Authorization
                 if (request.Key != _apiKey.Key)
                 {
                     _logger.LogInformation("Bot Authorize Request Denied: Invalid Key");
-                    return AuthorizeResult<Model>.Forbidden();
+                    return Task.FromResult(AuthorizeResult<Model>.Forbidden());
                 }
 
                 _logger.LogInformation("Bot Authorize Request Accepted");
@@ -62,7 +62,7 @@ namespace ClemBot.Api.Core.Features.Authorization
                 var token = _jwtAuthManager.GenerateToken(claims, DateTime.Now);
                 _logger.LogInformation("JWT Access Token Successfully Generated");
 
-                return AuthorizeResult<Model>.Success(new Model() { Token = token });
+                return Task.FromResult(AuthorizeResult<Model>.Success(new Model() { Token = token }));
             }
         }
     }

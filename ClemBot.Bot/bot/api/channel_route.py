@@ -15,10 +15,10 @@ class ChannelRoute(BaseRoute):
             'name': name,
             'guildId': guild_id
         }
-        await self.client.post('channels', data=json)
+        await self._client.post('channels', data=json)
 
     async def get_channel(self, channel_id: int):
-        user = await self.client.get(f'channels/{channel_id}')
+        user = await self._client.get(f'channels/{channel_id}')
 
         if user.status != 200:
             return
@@ -31,13 +31,13 @@ class ChannelRoute(BaseRoute):
             'name': name,
         }
 
-        return await self.client.patch('channels', data=json)
+        return await self._client.patch('channels', data=json)
 
     async def remove_channel(self, channel_id: int):
-        return await self.client.delete(f'channels/{channel_id}')
+        return await self._client.delete(f'channels/{channel_id}')
 
     async def get_guilds_channels(self, guild_id: int) -> t.Optional[t.List[int]]:
-        users = await self.client.get(f'guilds/{guild_id}/channels')
+        users = await self._client.get(f'guilds/{guild_id}/channels')
 
         if users.status != 200:
             return

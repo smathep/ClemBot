@@ -69,10 +69,8 @@ def main():
     # E.G a website frontend
     messenger = Messenger(name='primary_bot_messenger')
 
-    # create the custom prefix handler class, and register its methods
-    # as event callbacks
+    # create the custom prefix handler class
     custom_prefix = CustomPrefix(default=prefix)
-    messenger.subscribe(Events.on_set_custom_prefix, custom_prefix.set_prefix)
 
     # enable privileged member gateway intents
     intents = discord.Intents.default()

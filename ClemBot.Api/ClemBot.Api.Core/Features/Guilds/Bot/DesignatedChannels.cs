@@ -40,6 +40,6 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                         ChannelIds = y.Select(z => z.ChannelId)
                     }));
             }
-       }
+        }
     }
 }
