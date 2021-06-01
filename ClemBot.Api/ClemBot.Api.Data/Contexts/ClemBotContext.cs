@@ -14,7 +14,7 @@ namespace ClemBot.Api.Data.Contexts
 
         static ClemBotContext()
         {
-            NpgsqlConnection.GlobalTypeMapper.MapEnum<Claims>();
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<BotAuthClaims>();
             NpgsqlConnection.GlobalTypeMapper.MapEnum<DesignatedChannels>();
             NpgsqlConnection.GlobalTypeMapper.MapEnum<InfractionType>();
         }
@@ -39,7 +39,7 @@ namespace ClemBot.Api.Data.Contexts
                 .Property(p => p.IsAssignable)
                 .HasDefaultValue(true);
 
-            modelBuilder.HasPostgresEnum<Claims>();
+            modelBuilder.HasPostgresEnum<BotAuthClaims>();
             modelBuilder.HasPostgresEnum<DesignatedChannels>();
             modelBuilder.HasPostgresEnum<InfractionType>();
         }

@@ -5,7 +5,6 @@ import discord.ext.commands as commands
 
 import bot.extensions as ext
 from bot.consts import Colors, Claims
-from bot.data.claims_repository import ClaimsRepository
 from bot.utils.converters import ClaimsConverter
 
 
@@ -47,15 +46,13 @@ class ClaimsAuthorizationCog(commands.Cog):
             await self._send_user_claims(ctx, listing)
 
     async def _send_role_claims(self, ctx, role):
-        repo = ClaimsRepository()
-        claims = await repo.fetch_all_claims_role(role)
+        claims = await self.bot.claim_route.get_claims_role(role.id)
 
         embed = self._build_claims_embed(ctx, claims)
         await ctx.send(embed=embed)
 
     async def _send_user_claims(self, ctx, user):
-        repo = ClaimsRepository()
-        claims = await repo.fetch_all_claims_user(user)
+        claims = await self.bot.claim_route.get_claims_user(user)
 
         embed = self._build_claims_embed(ctx, claims)
         await ctx.send(embed=embed)
@@ -77,17 +74,16 @@ class ClaimsAuthorizationCog(commands.Cog):
     @ext.short_help('Add claims to a given role')
     @ext.example(('claims add emote_add @some_role', 'claims add tag_add @some_other_role'))
     async def add(self, ctx, claim: ClaimsConverter, role: discord.Role):
-        repo = ClaimsRepository()
-        if await repo.check_claim_role(claim, role):
+        if await self.bot.claim_route.check_claim_role(claim, role):
             embed = discord.Embed(title=f'Error: {claim.name} already added to {role.name}', color=Colors.Error)
             await ctx.send(embed=embed)
             return
 
-        await repo.add_claim_mapping(claim.name, role)
+        await self.bot.claim_route.add_claim_mapping(claim.name, role.id)
 
         title = f'Claim: "{claim.name}" successfully added to role @{role.name} :white_check_mark:'
 
-        claims = await repo.fetch_all_claims_role(role)
+        claims = await self.bot.claim_route.get_claims_role(role.id)
         claims_str = "\n".join(claims)
         desc = f'Current {role.mention} claims ```\n{claims_str}```'
 
@@ -102,21 +98,20 @@ class ClaimsAuthorizationCog(commands.Cog):
     @ext.short_help('Removes a claim from a given role')
     @ext.example(('claims remove emote_add @some_role', 'claims delete tag_add @some_other_role'))
     async def remove(self, ctx, claim: ClaimsConverter, role: discord.Role):
-        repo = ClaimsRepository()
-        if not await repo.check_claim_role(claim, role):
+        if not await self.bot.claim_route.check_claim_role(claim, role):
             embed = discord.Embed(title=f'Error: {claim.name} not added to {role.name}', color=Colors.Error)
             await ctx.send(embed=embed)
             return
 
         title = f'Claim: "{claim.name}" successfully removed from role @{role.name} :white_check_mark:'
 
-        claims = await repo.fetch_all_claims_role(role)
+        claims = await self.bot.claim_route.get_claims_role(role.id)
         claims_str = '\n'.join(claims) if claims else 'No current claims'
         desc = f'Current {role.mention} claims ```\n{claims_str}```'
 
         embed = discord.Embed(title=title, color=Colors.ClemsonOrange, description=desc)
         await ctx.send(embed=embed)
-        await repo.remove_claim_mapping(claim.name, role)
+        await self.bot.claim_route.remove_claim_mapping(claim.name, role.id)
 
     @claims.command(aliases=['get'])
     @ext.long_help(

@@ -18,7 +18,6 @@ from api.api_client import ApiClient
 import bot_secrets
 from api import *
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
-from bot.data.claims_repository import ClaimsRepository
 from bot.data.database import Database
 from bot.data.logout_repository import LogoutRepository
 from bot.errors import ClaimsAccessError
@@ -59,6 +58,7 @@ class ClemBot(commands.Bot):
         self.welcome_message_route: welcome_message_route.WelcomeMessageRoute = None
         self.custom_prefix_route: custom_prefix_route.CustomPrefixRoute = None
         self.moderation_route: moderation_route.ModerationRoute = None
+        self.claim_route: claim_route.ClaimRoute = None
 
         self.load_cogs()
         self.active_services = {}
@@ -106,7 +106,6 @@ class ClemBot(commands.Bot):
         """
         command = ctx.command
         author = ctx.author
-        repo = ClaimsRepository()
 
         if await self.is_owner(author):
             # if the author owns the bot, authorize the command no matter what
@@ -128,7 +127,7 @@ class ClemBot(commands.Bot):
             # The command is going to check the claims in the command body, nothing else to do
             return
 
-        claims = await repo.fetch_all_claims_user(author)
+        claims = await self.claim_route.get_claims_user(author)
 
         if claims and command.claims_check(claims):
             # Author has valid claims

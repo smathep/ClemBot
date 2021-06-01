@@ -9,5 +9,6 @@ __all__ = ['guild_route',
            'designated_channel_route',
            'welcome_message_route',
            'custom_prefix_route',
-           'moderation_route'
+           'moderation_route',
+           'claim_route'
            ]

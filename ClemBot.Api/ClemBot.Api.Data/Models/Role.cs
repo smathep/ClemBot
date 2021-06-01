@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ClemBot.Api.Data.Models
 {
     public class Role
@@ -10,5 +12,7 @@ namespace ClemBot.Api.Data.Models
 
         public ulong GuildId { get; set; }
         public Guild Guild { get; set; }
+
+        public List<ClaimsMapping> Claims { get; set; }
     }
 }

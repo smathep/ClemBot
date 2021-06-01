@@ -6,7 +6,7 @@ namespace ClemBot.Api.Data.Models
     {
         public int Id { get; set; }
 
-        public Claims Claim { get; set; }
+        public BotAuthClaims Claim { get; set; }
 
         public ulong RoleId { get; set; }
         public Role Role { get; set; }

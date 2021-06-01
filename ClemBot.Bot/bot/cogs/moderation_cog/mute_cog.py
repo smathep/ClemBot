@@ -6,7 +6,6 @@ import discord.ext.commands as commands
 
 import bot.extensions as ext
 from bot.consts import Claims, Colors, DesignatedChannels, Moderation
-from bot.data.moderation_repository import ModerationRepository
 from bot.messaging.events import Events
 from bot.utils.converters import Duration, DurationDelta
 from bot.utils.user_choice import UserChoice
@@ -125,11 +124,10 @@ class MuteCog(commands.Cog):
         'UnMutes a user for a with an optional reason'
     )
     @ext.short_help('UnMutes a user')
-    @ext.example(('Unmute @SomeUser Timeout'))
+    @ext.example('Unmute @SomeUser Timeout')
     @ext.required_claims(Claims.moderation_mute)
-    async def unmute(self, ctx: commands.Context, user: discord.Member, *, reason: t.Optional[str]):
-        repo = ModerationRepository()
-        mute_role = discord.utils.get(user.guild.roles, name=Moderation.mute_role_name)
+    async def unmute(self, ctx: commands.Context, subject: discord.Member, *, reason: t.Optional[str]):
+        mute_role = discord.utils.get(subject.guild.roles, name=Moderation.mute_role_name)
 
         if not mute_role:
             embed = discord.Embed(color=Colors.Error)
@@ -138,7 +136,8 @@ class MuteCog(commands.Cog):
             embed.set_author(name=self.get_full_name(ctx.author), icon_url=ctx.author.avatar_url)
             return await ctx.send(embed=embed)
 
-        mutes = await repo.get_all_active_mutes_member(user.guild.id, user.id)
+        mutes = await self.bot.moderation_route.get_guild_mutes_user(subject.guild.id, subject.id)
+        mutes = [mute for mute in mutes if mute.active]
 
         if not mutes:
             embed = discord.Embed(color=Colors.Error)
@@ -146,11 +145,21 @@ class MuteCog(commands.Cog):
             embed.set_author(name=self.get_full_name(ctx.author), icon_url=ctx.author.avatar_url)
             return await ctx.send(embed=embed)
 
-        await user.remove_roles(mute_role)
-
         for mute in mutes:
-            await repo.deactivate_mute(mute.id)
+            await self.bot.messenger.publish(Events.on_bot_unmute,
+                                             subject.guild,
+                                             subject,
+                                             mute.id,
+                                             reason,
+                                             ctx.author)
 
+        embed = discord.Embed(color=Colors.ClemsonOrange)
+        embed.title = f'{self.get_full_name(subject)} Unmuted  :speaker:'
+        embed.set_author(name=self.get_full_name(ctx.author), icon_url=ctx.author.avatar_url)
+        embed.add_field(name='Reason :page_facing_up:', value=f'```{reason}```', inline=False)
+        embed.set_thumbnail(url=subject.avatar_url_as(static_format='png'))
+
+        await ctx.send(embed=embed)
 
     def get_full_name(self, author) -> str:
         return f'{author.name}#{author.discriminator}'

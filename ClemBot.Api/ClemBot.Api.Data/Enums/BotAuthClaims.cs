@@ -1,6 +1,6 @@
 namespace ClemBot.Api.Data.Enums
 {
-    public enum Claims
+    public enum BotAuthClaims
     {
         designated_channel_view,
         designated_channel_modify,

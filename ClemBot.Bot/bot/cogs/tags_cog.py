@@ -7,8 +7,6 @@ import discord.ext.commands as commands
 
 import bot.extensions as ext
 from bot.consts import Colors, Claims
-from bot.data.claims_repository import ClaimsRepository
-from bot.data.tag_repository import TagRepository
 from bot.messaging.events import Events
 
 log = logging.getLogger(__name__)
@@ -43,7 +41,6 @@ class TagCog(commands.Cog):
     @ext.short_help('Supports custom tag functionality')
     @ext.example(('tag', 'tag mytag'))
     async def tag(self, ctx, tag_name=None):
-        repo = TagRepository()
 
         if tag_name:
             tag = await self.bot.tag_route.get_tag(ctx.guild.id, tag_name)
@@ -53,7 +50,6 @@ class TagCog(commands.Cog):
             await self.bot.tag_route.add_tag_use(ctx.guild.id, tag_name, ctx.channel.id, ctx.author.id)
             return await ctx.send(tag['content'])
 
-        tags = await repo.get_all_server_tags(ctx.guild.id)
         tags = await self.bot.tag_route.get_guilds_tags(ctx.guild.id)
 
         pages = []
@@ -121,14 +117,11 @@ class TagCog(commands.Cog):
 
         content = discord.utils.escape_mentions(content)
 
-        repo = TagRepository()
-        if await repo.check_tag_exists(name, ctx.guild.id):
+        if await self.bot.get_tag(ctx.guild.id, name):
             embed = discord.Embed(title=f'Error: Tag "{name}" already exists in this server', color=Colors.Error)
             await ctx.send(embed=embed)
             return
 
-        tag = Tag(name, content, datetime.utcnow(), ctx.guild.id, ctx.author.id)
-        await TagRepository().insert_tag(tag)
         await self.bot.tag_route.create_tag(name, content, ctx.guild.id, ctx.author.id)
 
         embed = discord.Embed(title=":white_check_mark: Tag successfully added", color=Colors.ClemsonOrange)
@@ -149,9 +142,6 @@ class TagCog(commands.Cog):
 
         name=name.lower()
 
-        tag_repo = TagRepository()
-        claims_repo = ClaimsRepository()
-
         tag = await self.bot.tag_route.get_tag(ctx.guild.id, name)
 
         if not tag:
@@ -165,7 +155,7 @@ class TagCog(commands.Cog):
             await self._delete_tag(name, ctx)
             return
 
-        claims = await claims_repo.fetch_all_claims_user(ctx.author)
+        claims = await self.bot.claim_route.get_claims_user(ctx.author)
 
         if ctx.command.claims_check(claims):
             await self._delete_tag(name, ctx)
@@ -185,8 +175,6 @@ class TagCog(commands.Cog):
 
         name = name.lower()
 
-        repo = TagRepository()
-
         if not (tag := await self.bot.tag_route.get_tag(ctx.guild.id, name)):
             embed = discord.Embed(title=f'Error: Tag {name} does not exist', color=Colors.Error)
             await ctx.send(embed=embed)
@@ -205,11 +193,8 @@ class TagCog(commands.Cog):
         await ctx.send(embed=embed)
 
     async def _delete_tag(self, name, ctx):
-        # repo = TagRepository()
-        # content = await repo.get_tag_content(name, ctx.guild.id)
         content = await self.bot.tag_route.get_tag_content(ctx.guild.id, name)
 
-        # await repo.delete_tag(name, ctx.guild.id)
         await self.bot.tag_route.delete_tag(ctx.guild.id, name)
 
         embed = discord.Embed(title=':white_check_mark: Tag successfully deleted', color=Colors.ClemsonOrange)

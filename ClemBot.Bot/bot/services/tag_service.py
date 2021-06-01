@@ -3,7 +3,6 @@ import re
 
 import discord
 
-from bot.data.tag_repository import TagRepository
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
 
@@ -20,7 +19,6 @@ class TagService(BaseService):
 
     @BaseService.Listener(Events.on_guild_message_received)
     async def on_guild_message_received(self, message: discord.Message) -> None:
-        repo = TagRepository()
 
         tags_content = []
         tag_found = False
@@ -36,7 +34,6 @@ class TagService(BaseService):
             # tags_content.append(await repo.get_tag_content(match, message.guild.id))
             tags_content.append(tag['content'])
 
-            await repo.increment_tag_use_counter(match, message.guild.id)
             await self.bot.tag_route.add_tag_use(message.guild.id, match, message.channel.id, message.author.id)
 
             log.info(f'Tag "{match}" invoked in guild: {message.guild.id} by: {message.author.id}')
