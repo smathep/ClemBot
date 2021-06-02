@@ -189,7 +189,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
-                { Status: QueryStatus.NotFound } => NoContent(),
+                { Status: QueryStatus.NotFound } => NotFound(),
                 _ => throw new InvalidOperationException()
             };
 
@@ -199,7 +199,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
-                { Status: QueryStatus.NotFound } => NoContent(),
+                { Status: QueryStatus.NotFound } => NotFound(),
                 _ => throw new InvalidOperationException()
             };
     }

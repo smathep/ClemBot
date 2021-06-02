@@ -62,3 +62,9 @@ class UserRoute(BaseRoute):
 
         return [u['id'] for u in users.value]
 
+    async def update_roles(self, user_id: int, roles: t.Iterable[int]):
+        json = {
+            'Roles': roles
+        }
+
+        await self._client.post(f'users/{user_id}/updateroles', data=json)

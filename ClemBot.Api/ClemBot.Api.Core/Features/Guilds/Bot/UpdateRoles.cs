@@ -27,6 +27,8 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
             public ulong Id { get; set; }
 
             public string? Name { get; set; }
+
+            public List<ulong> Members { get; set; } = new();
         }
 
         public record Command : IRequest<Result<ulong, QueryStatus>>
@@ -80,7 +82,21 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                         IsAssignable = false
                     };
                     _context.Roles.Add(roleEntity);
-                    guild?.Roles?.Add(roleEntity);
+                    guild.Roles.Add(roleEntity);
+                }
+
+                foreach (var roleDto in request.Roles)
+                {
+                    var role = await _context.Roles
+                        .Include(y => y.Users)
+                        .FirstOrDefaultAsync(x => roleDto.Id == x.Id);
+
+                    var members = await _context.Users
+                        .Where(x => roleDto.Members.Contains(x.Id))
+                        .ToListAsync();
+
+                    role.Users.Clear();
+                    role.Users = members;
                 }
 
                 await _context.SaveChangesAsync();

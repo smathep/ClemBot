@@ -19,7 +19,7 @@ namespace ClemBot.Api.Data.Models
 
         public List<Tag> Tags { get; set; } = new();
 
-        public List<Role>? Roles { get; set; } = new();
+        public List<Role> Roles { get; set; } = new();
 
         public List<Infraction> Infractions { get; set; } = new();
 

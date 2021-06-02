@@ -10,6 +10,8 @@ namespace ClemBot.Api.Data.Models
 
         public List<Guild> Guilds { get; set; } = new();
 
+        public List<Role> Roles { get; set; }
+
         public List<Tag> Tags { get; set; } = new();
 
         public List<Message> Messages { get; set; } = new();

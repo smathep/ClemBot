@@ -23,6 +23,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
         public class Command : IRequest<Result<ulong, QueryStatus>>
         {
             public ulong GuildId { get; set; }
+
             public ulong UserId { get; set; }
         }
 

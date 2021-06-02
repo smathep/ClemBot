@@ -8,7 +8,6 @@ using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Index = ClemBot.Api.Core.Features.Roles.Bot.Index;
 
 namespace ClemBot.Api.Core.Features.Roles
 {
@@ -26,7 +25,7 @@ namespace ClemBot.Api.Core.Features.Roles
         [HttpGet("bot/[controller]")]
         [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Index() =>
-            await _mediator.Send(new Index.Query()) switch
+            await _mediator.Send(new Bot.Index.Query()) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 _ => Ok(new List<ulong>())

@@ -2,7 +2,6 @@ import logging
 
 import discord
 
-from bot.data.role_repository import RoleRepository
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
 
@@ -16,42 +15,24 @@ class RoleHandlingService(BaseService):
 
     @BaseService.Listener(Events.on_guild_role_create)
     async def on_role_create(self, role):
-        await RoleRepository().add_or_update_role(role, role.guild.id)
-        await self.bot.role_route.create_role(role.id, role.name, role.guild.id)
+        await self.bot.role_route.create_role(role.id,
+                                              role.name,
+                                              role.permissions.administrator,
+                                              role.guild.id)
 
     @BaseService.Listener(Events.on_new_guild_initialized)
     async def on_new_guild_init(self, guild: discord.Guild):
-        await self.insert_roles(guild)
-        await self.bot.guild_route.update_guild_users(guild.id, guild.name, guild.roles)
+        await self.bot.guild_route.update_guild_roles(guild.id, guild.roles)
 
     @BaseService.Listener(Events.on_guild_role_delete)
     async def on_role_delete(self, role):
         log.info(f'Role: {role.id} deleted in guild: {role.guild.id}')
-        await RoleRepository().delete_role(role.id)
         await self.bot.role_route.remove_role(role.id)
 
     @BaseService.Listener(Events.on_guild_role_update)
     async def on_role_update(self, before, after: discord.Role):
         log.info(f'Role: {after.id} updated in guild: {after.guild.id}')
-        await RoleRepository().add_or_update_role(after, after.guild.id)
-        await self.bot.role_route.edit_role(after.id, after.name)
-
-    async def insert_roles(self, guild: discord.Guild):
-        log.info(f'Loading Roles from {guild.name}')
-
-        role_repo = RoleRepository()
-
-        db_roles = [i[0] for i in await role_repo.get_role_ids(guild.id)]
-        api_roles = [r.id for r in guild.roles]
-
-        for deleted_role_id in set(db_roles) - set(api_roles):
-            log.info(f'Missing role {deleted_role_id} found, removing from local db')
-            await role_repo.delete_role(deleted_role_id)
-
-        for role in guild.roles:
-            log.info(f'Loading role "{role.name}" in {guild.name}')
-            await role_repo.add_or_update_role(role, guild.id)
+        await self.bot.role_route.edit_role(after.id, after.name, after.permissions.administrator)
 
     async def load_service(self):
-        for guild in self.bot.guilds:
-            await self.insert_roles(guild)
+        pass

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.Users;
+using ClemBot.Api.Core.Features.Users.Bot;
 using ClemBot.Api.Core.Security;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
@@ -65,6 +66,16 @@ namespace ClemBot.Api.Core.Features.Users
         [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> Infractions([FromRoute] Bot.Infractions.Query command) =>
             await _mediator.Send(command) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NotFound(),
+                _ => throw new InvalidOperationException()
+            };
+
+        [HttpPost("bot/[controller]/{Id}/updateroles")]
+        [Authorize(Policy = Policies.BotMaster)]
+        public async Task<IActionResult> UpdateRoles(ulong Id, UpdateRoles.Command command) =>
+            await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 { Status: QueryStatus.NotFound } => NotFound(),

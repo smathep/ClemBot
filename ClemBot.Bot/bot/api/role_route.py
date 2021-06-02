@@ -9,10 +9,11 @@ class RoleRoute(BaseRoute):
     def __init__(self, api_client: ApiClient):
         super().__init__(api_client)
 
-    async def create_role(self, role_id: int, name: int, guild_id: int):
+    async def create_role(self, role_id: int, name: int, is_admin: bool, guild_id: int):
         json = {
             'id': role_id,
             'name': name,
+            'admin': is_admin,
             'guildId': guild_id
         }
         await self._client.post('roles', data=json)
@@ -25,10 +26,11 @@ class RoleRoute(BaseRoute):
 
         return user.value
 
-    async def edit_role(self, role_id: int, name: str):
+    async def edit_role(self, role_id: int, name: str, is_admin: bool):
         json = {
             'id': role_id,
             'name': name,
+            'admin': is_admin
         }
 
         await self._client.patch('roles', data=json)
@@ -43,3 +45,4 @@ class RoleRoute(BaseRoute):
             return
 
         return users.value
+

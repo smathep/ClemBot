@@ -28,6 +28,8 @@ class UserHandlingService(BaseService):
 
         await self.bot.user_route.add_user_guild(user.id, user.guild.id)
 
+        await self.bot.user_route.update_roles(user.id, [r.id for r in user.roles])
+
         await self.notify_user_join(user)
 
     @BaseService.Listener(Events.on_user_removed)
@@ -37,6 +39,10 @@ class UserHandlingService(BaseService):
         await self.bot.user_route.remove_user_guild(user.id, user.guild.id)
 
         await self.notify_user_remove(user)
+
+    @BaseService.Listener(Events.on_member_update)
+    async def on_member_update(self, _, after):
+        await self.bot.user_route.update_roles(after.id, [r.id for r in after.roles])
 
     @BaseService.Listener(Events.on_new_guild_initialized)
     async def on_new_guild_init(self, guild):

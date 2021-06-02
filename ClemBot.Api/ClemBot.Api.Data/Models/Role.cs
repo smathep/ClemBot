@@ -10,8 +10,12 @@ namespace ClemBot.Api.Data.Models
 
         public bool? IsAssignable { get; set; } = false;
 
+        public bool Admin { get; set; }
+
         public ulong GuildId { get; set; }
         public Guild Guild { get; set; }
+
+        public List<User> Users { get; set; }
 
         public List<ClaimsMapping> Claims { get; set; }
     }

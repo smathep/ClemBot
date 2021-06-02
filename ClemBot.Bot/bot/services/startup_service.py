@@ -68,6 +68,10 @@ class StartupService(BaseService):
         log.info('Resetting Guilds')
         await self.load_guilds()
 
+        # Reset active roles, send all roles to the backend and delete any not present and add any that are new
+        log.info('Resetting Guild Roles state')
+        await self.load_roles()
+
         # Load new users, this will pull known users and compare to current users and only add the new ones
         log.info('Resetting Users')
         await self.load_users()
@@ -76,10 +80,6 @@ class StartupService(BaseService):
         # to replace the current known state
         log.info('Resetting User_Guilds state')
         await self.load_users_guilds()
-
-        # Reset active roles, send all roles to the backend and delete any not present and add any that are new
-        log.info('Resetting Guild Roles state')
-        await self.load_roles()
 
         # Reset active channels, send all channels to the backend and delete any not present and add any that are new
         log.info('Resetting Guild Channels state')

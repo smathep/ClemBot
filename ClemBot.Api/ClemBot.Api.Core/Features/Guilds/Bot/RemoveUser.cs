@@ -32,13 +32,13 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
             public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var guild = await _context.Guilds
-                    .Where(x => x.Id == request.GuildId)
                     .Include(y => y.Users)
+                    .Where(x => x.Id == request.GuildId)
                     .FirstOrDefaultAsync();
 
                 var user = await _context.Users
+                    .Include(z => z.Roles)
                     .Where(x => x.Id == request.UserId)
-                    .Include(y => y.Guilds)
                     .FirstOrDefaultAsync();
 
                 if (!guild.Users.Contains(user))
@@ -46,7 +46,9 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                     return QueryResult<ulong>.NotFound();
                 }
 
+                user.Roles.RemoveAll(x => x.GuildId == guild.Id);
                 guild.Users.Remove(user);
+
                 await _context.SaveChangesAsync();
 
                 return QueryResult<ulong>.Success(guild.Id);

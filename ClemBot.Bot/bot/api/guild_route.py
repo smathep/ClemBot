@@ -55,9 +55,9 @@ class GuildRoute(BaseRoute):
 
     async def update_guild_users(self, guild_id: int, users: t.List[discord.Member]):
         users = [{
-            'id': u.id,
-            'name': u.name
-        }
+                'id': u.id,
+                'name': u.name
+            }
             for u in users]
 
         json = {
@@ -69,8 +69,12 @@ class GuildRoute(BaseRoute):
     async def update_guild_roles(self, guild_id: int, roles: t.List[discord.Role]):
         roles = [{
                 'id': r.id,
-                'name': r.name
-            }
+                'name': r.name,
+                'admin': r.permissions.administrator,
+                'members': [
+                    m.id for m in r.members
+                ]
+        }
             for r in roles]
 
         json = {
