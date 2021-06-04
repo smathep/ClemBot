@@ -1,7 +1,7 @@
 import typing as t
 
-from api.api_client import ApiClient
-from api.base_route import BaseRoute
+from bot.api.api_client import ApiClient
+from bot.api.base_route import BaseRoute
 
 
 class RoleRoute(BaseRoute):
@@ -45,4 +45,3 @@ class RoleRoute(BaseRoute):
             return
 
         return users.value
-

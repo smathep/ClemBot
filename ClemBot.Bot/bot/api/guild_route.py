@@ -2,8 +2,8 @@ import typing as t
 
 import discord
 
-from api.api_client import ApiClient
-from api.base_route import BaseRoute
+from bot.api.api_client import ApiClient
+from bot.api.base_route import BaseRoute
 
 
 class GuildRoute(BaseRoute):
@@ -16,8 +16,8 @@ class GuildRoute(BaseRoute):
             return
 
         json = {
-            'id': guild_id,
-            'name': name
+            'Id': guild_id,
+            'Name': name
         }
         await self._client.post('guilds', data=json)
 
@@ -47,38 +47,36 @@ class GuildRoute(BaseRoute):
 
     async def edit_guild(self, guild_id: int, name: str):
         json = {
-            'id': guild_id,
-            'name': name,
+            'Id': guild_id,
+            'Name': name,
         }
 
         await self._client.patch('guilds', data=json)
 
     async def update_guild_users(self, guild_id: int, users: t.List[discord.Member]):
         users = [{
-                'id': u.id,
-                'name': u.name
-            }
+            'Id': u.id,
+            'Name': u.name
+        }
             for u in users]
 
         json = {
-            'users': users
+            'Users': users
         }
 
         await self._client.patch(f'guilds/{guild_id}/update/users', data=json)
 
     async def update_guild_roles(self, guild_id: int, roles: t.List[discord.Role]):
         roles = [{
-                'id': r.id,
-                'name': r.name,
-                'admin': r.permissions.administrator,
-                'members': [
-                    m.id for m in r.members
-                ]
+            'Id': r.id,
+            'Name': r.name,
+            'Admin': r.permissions.administrator,
+            'Members': [m.id for m in r.members]
         }
             for r in roles]
 
         json = {
-            'roles': roles
+            'Roles': roles
         }
 
         await self._client.patch(f'guilds/{guild_id}/update/roles', data=json)
@@ -86,12 +84,12 @@ class GuildRoute(BaseRoute):
     async def update_guild_channels(self, guild_id: int, channels: t.List[discord.TextChannel]):
         channels = [{
             'id': r.id,
-            'name': r.name
+            'Name': r.name
         }
             for r in channels]
 
         json = {
-            'channels': channels
+            'Channels': channels
         }
 
         await self._client.patch(f'guilds/{guild_id}/update/channels', data=json)

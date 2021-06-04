@@ -6,7 +6,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClemBot.Api.Core.Features.Tags.Bot
+namespace ClemBot.Api.Core.Features.Tags
 {
     public class Edit
     {

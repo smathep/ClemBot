@@ -7,7 +7,8 @@ import discord.ext.commands as commands
 import discord.utils as utils
 
 import bot.extensions as ext
-import bot_secrets
+import bot.bot_secrets as bot_secrets
+
 log = logging.getLogger(__name__)
 
 HEADERS = {

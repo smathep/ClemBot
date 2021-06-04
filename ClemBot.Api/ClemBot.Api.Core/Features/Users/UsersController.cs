@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.Users;
 using ClemBot.Api.Core.Features.Users.Bot;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +26,7 @@ namespace ClemBot.Api.Core.Features.Users
         }
 
         [HttpGet("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Index() =>
             await _mediator.Send(new Bot.Index.Query()) switch
             {
@@ -34,7 +36,7 @@ namespace ClemBot.Api.Core.Features.Users
 
 
         [HttpGet("bot/[controller]/{Id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Details([FromRoute] Bot.Details.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -43,7 +45,7 @@ namespace ClemBot.Api.Core.Features.Users
             };
 
         [HttpPost("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Create(Bot.Create.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -53,7 +55,7 @@ namespace ClemBot.Api.Core.Features.Users
             };
 
         [HttpPatch("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Edit(Bot.Edit.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -63,7 +65,7 @@ namespace ClemBot.Api.Core.Features.Users
             };
 
         [HttpGet("bot/[controller]/infractions/{UserId}/{GuildId}/{Type?}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Infractions([FromRoute] Bot.Infractions.Query command) =>
             await _mediator.Send(command) switch
             {
@@ -73,7 +75,7 @@ namespace ClemBot.Api.Core.Features.Users
             };
 
         [HttpPost("bot/[controller]/{Id}/updateroles")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> UpdateRoles(ulong Id, UpdateRoles.Command command) =>
             await _mediator.Send(command with { Id = Id }) switch
             {

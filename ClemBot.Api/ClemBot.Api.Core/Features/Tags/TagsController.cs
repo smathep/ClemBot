@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.Tags;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,8 +23,8 @@ namespace ClemBot.Api.Core.Features.Tags
         }
 
         [HttpPost("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
-        public async Task<IActionResult> Create(Bot.Create.Command command) =>
+        [BotMasterAuthorize]
+        public async Task<IActionResult> Create(Create.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -31,8 +33,8 @@ namespace ClemBot.Api.Core.Features.Tags
             };
 
         [HttpPatch("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
-        public async Task<IActionResult> Edit(Bot.Edit.Command command) =>
+        [BotMasterAuthorize]
+        public async Task<IActionResult> Edit(Edit.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -40,8 +42,8 @@ namespace ClemBot.Api.Core.Features.Tags
             };
 
         [HttpGet("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
-        public async Task<IActionResult> Details(Bot.Details.Query query) =>
+        [BotMasterAuthorize]
+        public async Task<IActionResult> Details(Details.Query query) =>
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -49,8 +51,8 @@ namespace ClemBot.Api.Core.Features.Tags
             };
 
         [HttpDelete("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
-        public async Task<IActionResult> Delete(Bot.Delete.Command command) =>
+        [BotMasterAuthorize]
+        public async Task<IActionResult> Delete(Delete.Command command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
@@ -59,7 +61,7 @@ namespace ClemBot.Api.Core.Features.Tags
             };
 
         [HttpPost("bot/[controller]/invoke")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> AddUse(Bot.Invoke.Command command) =>
             await _mediator.Send(command) switch
             {

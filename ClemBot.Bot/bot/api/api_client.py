@@ -5,8 +5,8 @@ from urllib.parse import quote
 
 import aiohttp
 
-import bot_secrets
-from consts import Urls
+import bot.bot_secrets as bot_secrets
+from bot.consts import Urls
 
 log = logging.getLogger(__name__)
 
@@ -38,6 +38,7 @@ class ApiClient:
         # Create an empty async method so our callback doesnt throw when we await it
         async def async_stub():
             pass
+
         self.reconnect_callback = reconnect_callback or async_stub
 
     @staticmethod
@@ -52,10 +53,10 @@ class ApiClient:
                                         ssl=False,
                                         params={'key': bot_secrets.secrets.api_key}
                                         ) as resp:
-
             if resp.status != 200:
                 self.connected = False
-                log.error(f'Connecting to ClemBot.Api at Url: {bot_secrets.secrets.api_url} failed with response code: {resp.status}')
+                log.error(f'Connecting to ClemBot.Api at Url: {bot_secrets.secrets.api_url} '
+                          f'failed with response code: {resp.status}')
                 return
 
             self.connected = True

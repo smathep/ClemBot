@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.Messages;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +23,7 @@ namespace ClemBot.Api.Core.Features.Messages
         }
 
         [HttpPost("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Create(Bot.Create.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -31,7 +33,7 @@ namespace ClemBot.Api.Core.Features.Messages
             };
 
         [HttpPatch("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Edit(Bot.Edit.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -40,7 +42,7 @@ namespace ClemBot.Api.Core.Features.Messages
             };
 
         [HttpGet("bot/[controller]/{Id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Details([FromRoute] Bot.Details.Query query) =>
             await _mediator.Send(query) switch
             {

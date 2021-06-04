@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Security.Policies.GuildSandbox;
 using ClemBot.Api.Core.Utilities;
 using ClemBot.Api.Data.Contexts;
 using ClemBot.Api.Data.Models;
@@ -17,7 +18,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
         {
             public Validator()
             {
-                RuleFor(p => p.Id).NotNull();
+                RuleFor(p => p.GuildId).NotNull();
                 RuleFor(p => p.Roles).NotEmpty();
             }
         }
@@ -28,14 +29,16 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
 
             public string? Name { get; set; }
 
+            public bool Admin { get; set; }
+
             public List<ulong> Members { get; set; } = new();
         }
 
         public record Command : IRequest<Result<ulong, QueryStatus>>
         {
-            public ulong Id { get; set; }
+            public ulong GuildId { get; init; }
 
-            public List<RoleDto> Roles { get; set; } = new();
+            public IReadOnlyList<RoleDto> Roles { get; set; } = new List<RoleDto>();
         }
 
         public record Handler(ClemBotContext _context)
@@ -44,16 +47,17 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
             public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var guild = await _context.Guilds
-                    .Where(x => x.Id == request.Id)
+                    .Where(x => x.Id == request.GuildId)
                     .Include(y => y.Roles)
                     .FirstOrDefaultAsync();
 
-                var roles = guild?.Roles ?? new List<Role>();
 
                 if (guild is null)
                 {
                     return QueryResult<ulong>.NotFound();
                 }
+
+                var roles = guild.Roles ?? new List<Role>();
 
                 // Get all roles that are common to both enumerables and check for a name change
                 foreach (var roleId in roles
@@ -63,6 +67,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                 {
                     var role = roles.First(x => x.Id == roleId);
                     role.Name = request.Roles.First(x => x.Id == roleId).Name;
+                    role.Admin = request.Roles.First(x => x.Id == roleId).Admin;
                 }
 
                 // Get all roles that have been deleted
@@ -78,13 +83,15 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                     {
                         Id = role.Id,
                         Name = role.Name,
-                        GuildId = request.Id,
+                        GuildId = request.GuildId,
+                        Admin = role.Admin,
                         IsAssignable = false
                     };
                     _context.Roles.Add(roleEntity);
-                    guild.Roles.Add(roleEntity);
+                    guild.Roles?.Add(roleEntity);
                 }
 
+                // Reset Role Member mappings
                 foreach (var roleDto in request.Roles)
                 {
                     var role = await _context.Roles
@@ -101,7 +108,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
 
                 await _context.SaveChangesAsync();
 
-                return QueryResult<ulong>.Success(request.Id);
+                return QueryResult<ulong>.Success(request.GuildId);
             }
         }
     }

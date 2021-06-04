@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.Roles.Bot;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Claims = ClemBot.Api.Core.Features.Roles.Bot.Claims;
 
 namespace ClemBot.Api.Core.Features.Roles
 {
@@ -23,7 +25,7 @@ namespace ClemBot.Api.Core.Features.Roles
         }
 
         [HttpGet("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Index() =>
             await _mediator.Send(new Bot.Index.Query()) switch
             {
@@ -32,7 +34,7 @@ namespace ClemBot.Api.Core.Features.Roles
             };
 
         [HttpGet("bot/[controller]/{Id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Details([FromRoute] Details.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -41,7 +43,7 @@ namespace ClemBot.Api.Core.Features.Roles
             };
 
         [HttpDelete("bot/[controller]/{Id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Delete([FromRoute] Delete.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -51,7 +53,7 @@ namespace ClemBot.Api.Core.Features.Roles
             };
 
         [HttpPost("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Create(Create.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -60,8 +62,18 @@ namespace ClemBot.Api.Core.Features.Roles
                 _ => throw new InvalidOperationException()
             };
 
+        [HttpGet("bot/[controller]/{Id}/claimmappings")]
+        [BotMasterAuthorize]
+        public async Task<IActionResult> Claims([FromRoute] Claims.Query command) =>
+            await _mediator.Send(command) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.NotFound } => NotFound(),
+                _ => throw new InvalidOperationException()
+            };
+
         [HttpPatch("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Edit(Edit.Command command) =>
             await _mediator.Send(command) switch
             {

@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.DesignatedChannels.Bot;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +24,7 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
         }
 
         [HttpGet("bot/[controller]/{Designation}/index")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Index([FromRoute] Index.Query command) =>
             await _mediator.Send(command) switch
             {
@@ -31,7 +33,7 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
             };
 
         [HttpGet("bot/[controller]/details")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Details(Details.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -40,7 +42,7 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
             };
 
         [HttpDelete("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Delete(Delete.Command query) =>
             await _mediator.Send(query) switch
             {
@@ -50,7 +52,7 @@ namespace ClemBot.Api.Core.Features.DesignatedChannels
             };
 
         [HttpPost("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Register(Register.Command command) =>
             await _mediator.Send(command) switch
             {

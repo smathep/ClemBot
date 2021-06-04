@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace ClemBot.Api.Core.Security
+namespace ClemBot.Api.Core.Security.JwtToken
 {
     public interface IJwtAuthManager
     {

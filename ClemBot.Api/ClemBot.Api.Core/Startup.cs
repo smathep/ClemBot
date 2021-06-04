@@ -5,10 +5,16 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.JwtToken;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
+using ClemBot.Api.Core.Security.Policies.GuildSandbox;
 using ClemBot.Api.Data.Contexts;
+using ClemBot.Api.Data.Enums;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -38,15 +44,16 @@ namespace ClemBot.Api.Core
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers().AddFluentValidation(s => {
-                s.RegisterValidatorsFromAssemblyContaining<Startup>();
-            })
-                .AddJsonOptions(options =>
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+            services.AddControllers()
+                .AddFluentValidation(s => {
+                    s.RegisterValidatorsFromAssemblyContaining<Startup>();
+                })
+                .AddJsonOptions(options => {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             var apiKey = Configuration["BotApiKey"];
             services.AddSingleton(new ApiKey() { Key = apiKey });
-
 
             var jwtTokenConfig = Configuration.GetSection("JwtTokenConfig").Get<JwtTokenConfig>();
             jwtTokenConfig.Secret = Guid.NewGuid().ToString();
@@ -78,7 +85,6 @@ namespace ClemBot.Api.Core
             services.AddHttpClient();
             services.AddHttpContextAccessor();
 
-
             services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -98,9 +104,14 @@ namespace ClemBot.Api.Core
 
             services.AddAuthorization(options => {
                 options.AddPolicy(Policies.BotMaster, policy => {
-                    policy.RequireClaim(Claims.BotApiKeyClaim);
+                    policy.RequireClaim(Claims.BotApiKey);
                 });
             });
+
+            services.AddScoped<IAuthorizationHandler, BotMasterAuthHandler>();
+            services.AddScoped<IAuthorizationHandler, GuildSandboxAuthHandler>();
+            services.AddSingleton<IAuthorizationPolicyProvider, GuildSandboxPolicyProvider>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -7,7 +7,7 @@ import aiosqlite
 import discord
 import discord.ext.commands as commands
 
-import bot_secrets
+import bot.bot_secrets as bot_secrets
 from bot.consts import Colors, DiscordLimits, OwnerDesignatedChannels, DesignatedChannels
 from bot.data.base_repository import BaseRepository
 from bot.data.designated_channel_repository import DesignatedChannelRepository

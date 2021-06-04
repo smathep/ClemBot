@@ -1,10 +1,9 @@
 import logging
-import typing as t
 
 import discord
 from discord.ext import commands
 
-from clem_bot import ClemBot
+from bot.clem_bot import ClemBot
 
 log = logging.getLogger(__name__)
 

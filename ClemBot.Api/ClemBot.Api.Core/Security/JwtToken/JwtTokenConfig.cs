@@ -1,4 +1,4 @@
-namespace ClemBot.Api.Core.Security
+namespace ClemBot.Api.Core.Security.JwtToken
 {
     public class JwtTokenConfig
     {

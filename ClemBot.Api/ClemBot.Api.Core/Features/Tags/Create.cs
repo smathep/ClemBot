@@ -7,7 +7,7 @@ using ClemBot.Api.Data.Models;
 using FluentValidation;
 using MediatR;
 
-namespace ClemBot.Api.Core.Features.Tags.Bot
+namespace ClemBot.Api.Core.Features.Tags
 {
     public class Create
     {

@@ -10,20 +10,20 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-import api
+from bot.api import *
+import bot.api as api
 import bot.cogs as cogs
 import bot.extensions as ext
 import bot.services as services
-from api.api_client import ApiClient
-import bot_secrets
-from api import *
+from bot.api.api_client import ApiClient
+import bot.bot_secrets as bot_secrets
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
 from bot.data.database import Database
 from bot.data.logout_repository import LogoutRepository
 from bot.errors import ClaimsAccessError
 from bot.messaging.events import Events
-from messaging.messenger import Messenger
-from utils.scheduler import Scheduler
+from bot.messaging.messenger import Messenger
+from bot.utils.scheduler import Scheduler
 
 log = logging.getLogger(__name__)
 
@@ -322,7 +322,8 @@ class ClemBot(commands.Bot):
         # Here we remove the first 4 characters of the module name
         # That's because __module__ gives us the full name e.g api.guild_route
         # so we need to remove the api. to correctly set the attr name
-        self.__setattr__(r.__module__[4:], r)
+        print(r.__module__)
+        self.__setattr__(r.__module__[8:], r)
 
     async def load_services(self) -> None:
         log.info('Loading Services')

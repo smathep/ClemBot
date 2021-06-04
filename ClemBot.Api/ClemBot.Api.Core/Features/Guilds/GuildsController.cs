@@ -4,7 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.Guilds;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
+using ClemBot.Api.Core.Security.Policies.GuildSandbox;
 using ClemBot.Api.Core.Utilities;
+using ClemBot.Api.Data.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +31,7 @@ namespace ClemBot.Api.Core.Features.Guilds
         }
 
         [HttpGet("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Index() =>
             await _mediator.Send(new Bot.Index.Query()) switch
             {
@@ -36,7 +40,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Details([FromRoute] Bot.Details.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -45,7 +49,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpDelete("bot/[controller]/{Id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Delete([FromRoute] Bot.Delete.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -55,7 +59,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpPost("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Create(Bot.Create.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -65,7 +69,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpPost("bot/[controller]/AddUser")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> AddUser(Bot.AddUser.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -75,7 +79,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpDelete("bot/[controller]/RemoveUser")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> RemoveUser(Bot.RemoveUser.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -85,7 +89,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpPatch("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Edit(Bot.Edit.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -96,7 +100,7 @@ namespace ClemBot.Api.Core.Features.Guilds
         [HttpPatch("bot/[controller]/{Id}/Update/Users")]
         [Authorize(Policy = Policies.BotMaster)]
         public async Task<IActionResult> UpdateUsers(ulong Id, Bot.UpdateUsers.Command command) =>
-            await _mediator.Send(command with { Id = Id }) switch
+            await _mediator.Send(command with { GuildId = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 { Status: QueryStatus.NotFound } => NotFound(),
@@ -104,9 +108,9 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpPatch("bot/[controller]/{Id}/Update/Roles")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> UpdateRoles(ulong Id, Bot.UpdateRoles.Command command) =>
-            await _mediator.Send(command with { Id = Id }) switch
+            await _mediator.Send(command with { GuildId = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 { Status: QueryStatus.NotFound } => NotFound(),
@@ -114,9 +118,9 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpPatch("bot/[controller]/{Id}/Update/Channels")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> UpdateChannels(ulong Id, Bot.UpdateChannels.Command command) =>
-            await _mediator.Send(command with { Id = Id }) switch
+            await _mediator.Send(command with { GuildId = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),
                 { Status: QueryStatus.NotFound } => NotFound(),
@@ -124,7 +128,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{Id}/Roles")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Roles([FromRoute] Bot.Roles.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -134,7 +138,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{Id}/Tags")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Tags([FromRoute] Bot.Tags.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -144,7 +148,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{Id}/CustomPrefixes")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Tags([FromRoute] Bot.CustomPrefixes.Query query) =>
             await _mediator.Send(query) switch
             {
@@ -154,7 +158,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{Id}/DesignatedChannels")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Index([FromRoute] Bot.DesignatedChannels.Query command) =>
             await _mediator.Send(command) switch
             {
@@ -164,7 +168,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{Id}/Infractions")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Index([FromRoute] Bot.Infractions.Query command) =>
             await _mediator.Send(command) switch
             {
@@ -174,7 +178,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpPost("bot/[controller]/{Id}/SetWelcomeMessage")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> SetWelcomeMessage(ulong Id, [FromBody] Bot.SetWelcomeMessage.Command command) =>
             await _mediator.Send(command with { Id = Id }) switch
             {
@@ -184,7 +188,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{Id}/GetWelcomeMessage")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> GetWelcomeMessage([FromRoute] Bot.GetWelcomeMessage.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -194,7 +198,7 @@ namespace ClemBot.Api.Core.Features.Guilds
             };
 
         [HttpGet("bot/[controller]/{Id}/DeleteWelcomeMessage")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> DeleteWelcomeMessage(ulong Id, Bot.DeleteWelcomeMessage.Command command) =>
             await _mediator.Send(command with { Id = Id }) switch
             {

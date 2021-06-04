@@ -5,10 +5,8 @@ import discord
 import discord.ext.commands as commands
 
 import bot.extensions as ext
-import bot_secrets
+import bot.bot_secrets as bot_secrets
 from bot.consts import Claims, Colors
-from bot.data.custom_prefixes_repository import CustomPrefixesRepository
-from bot.messaging.events import Events
 
 log = logging.getLogger(__name__)
 

@@ -1,10 +1,8 @@
-import typing as t
-
 import discord
 
-from api.api_client import ApiClient
-from api.base_route import BaseRoute
-from consts import Claims
+from bot.api.api_client import ApiClient
+from bot.api.base_route import BaseRoute
+from bot.consts import Claims
 
 
 class ClaimRoute(BaseRoute):
@@ -54,5 +52,3 @@ class ClaimRoute(BaseRoute):
 
     async def check_claim_user(self, claim: Claims, user: discord.Member) -> bool:
         return claim in await self.get_claims_user(user)
-
-

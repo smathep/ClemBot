@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ClemBot.Api.Core.Security
+namespace ClemBot.Api.Core.Security.JwtToken
 {
     public class JwtAuthManager : IJwtAuthManager
     {

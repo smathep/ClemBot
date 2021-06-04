@@ -1,6 +1,6 @@
 import abc
 
-from api.api_client import ApiClient
+from bot.api.api_client import ApiClient
 
 
 class BaseRoute(abc.ABC):

@@ -1,9 +1,5 @@
-import typing as t
-
-import discord
-
-from api.api_client import ApiClient
-from api.base_route import BaseRoute
+from bot.api.api_client import ApiClient
+from bot.api.base_route import BaseRoute
 
 
 class WelcomeMessageRoute(BaseRoute):
@@ -12,7 +8,6 @@ class WelcomeMessageRoute(BaseRoute):
         super().__init__(api_client)
 
     async def set_welcome_message(self, guild_id: int, message: str):
-
         json = {
             'Message': message
         }

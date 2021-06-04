@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +22,7 @@ namespace ClemBot.Api.Core.Features.Infractions
         }
 
         [HttpPost("bot/[controller]")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Create(Bot.Create.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -30,7 +32,7 @@ namespace ClemBot.Api.Core.Features.Infractions
             };
 
         [HttpDelete("bot/[controller]/{Id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Delete([FromRoute] Bot.Delete.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -40,7 +42,7 @@ namespace ClemBot.Api.Core.Features.Infractions
             };
 
         [HttpGet("bot/[controller]/{Id}")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Details([FromRoute] Bot.Details.Query command) =>
             await _mediator.Send(command) switch
             {
@@ -50,7 +52,7 @@ namespace ClemBot.Api.Core.Features.Infractions
             };
 
         [HttpPatch("bot/[controller]/{Id}/deactivate")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Deactivate([FromRoute] Bot.Deactivate.Query command) =>
             await _mediator.Send(command) switch
             {

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Features.Roles.Bot;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.Policies;
+using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +24,7 @@ namespace ClemBot.Api.Core.Features.CustomPrefixes
         }
 
         [HttpPost("bot/[controller]/Add")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Add(Bot.Add.Command command) =>
             await _mediator.Send(command) switch
             {
@@ -31,7 +33,7 @@ namespace ClemBot.Api.Core.Features.CustomPrefixes
             };
 
         [HttpDelete("bot/[controller]/Delete")]
-        [Authorize(Policy = Policies.BotMaster)]
+        [BotMasterAuthorize]
         public async Task<IActionResult> Add(Bot.Delete.Command command) =>
             await _mediator.Send(command) switch
             {

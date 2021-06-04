@@ -6,11 +6,10 @@ from pathlib import Path
 
 import discord
 
-from api.api_client import ApiClient
-import bot_secrets
+from bot.api.api_client import ApiClient
+import bot.bot_secrets as bot_secrets
 from bot.clem_bot import ClemBot
 from bot.custom_prefix import CustomPrefix
-from bot.messaging.events import Events
 from bot.messaging.messenger import Messenger
 from bot.utils.scheduler import Scheduler
 

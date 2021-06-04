@@ -1,9 +1,5 @@
-import typing as t
-
-import discord
-
-from api.api_client import ApiClient
-from api.base_route import BaseRoute
+from bot.api.api_client import ApiClient
+from bot.api.base_route import BaseRoute
 
 
 class CustomPrefixRoute(BaseRoute):
@@ -28,4 +24,3 @@ class CustomPrefixRoute(BaseRoute):
     async def get_custom_prefixes(self, guild_id: int):
         resp = await self._client.get(f'guilds/{guild_id}/customprefixes')
         return resp.value
-

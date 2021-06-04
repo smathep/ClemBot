@@ -1,7 +1,7 @@
 import abc
 import inspect
 
-from clem_bot import ClemBot
+from bot.clem_bot import ClemBot
 
 
 class BaseService(abc.ABC):

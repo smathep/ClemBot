@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using ClemBot.Api.Core.Security;
+using ClemBot.Api.Core.Security.JwtToken;
 using ClemBot.Api.Core.Utilities;
 using ClemBot.Api.Data.Contexts;
 using FluentValidation;
@@ -55,8 +56,11 @@ namespace ClemBot.Api.Core.Features.Authorization
 
                 _logger.LogInformation("Bot Authorize Request Accepted");
 
-                _logger.LogInformation($"Generating Claim: {Claims.BotApiKeyClaim}");
-                var claims = new[] { new Claim(Claims.BotApiKeyClaim, request.Key) };
+                _logger.LogInformation($"Generating Claim: {Claims.BotApiKey}");
+                var claims = new[]
+                {
+                    new Claim(Claims.BotApiKey, request.Key)
+                };
 
                 _logger.LogInformation("Generating JWT Access Token");
                 var token = _jwtAuthManager.GenerateToken(claims, DateTime.Now);

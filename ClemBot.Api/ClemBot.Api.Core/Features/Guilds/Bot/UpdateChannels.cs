@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ClemBot.Api.Core.Security.Policies.GuildSandbox;
 using ClemBot.Api.Core.Utilities;
 using ClemBot.Api.Data.Contexts;
 using ClemBot.Api.Data.Models;
@@ -17,7 +18,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
         {
             public Validator()
             {
-                RuleFor(p => p.Id).NotNull();
+                RuleFor(p => p.GuildId).NotNull();
                 RuleFor(p => p.Channels).NotEmpty();
             }
         }
@@ -31,9 +32,9 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
 
         public record Command : IRequest<Result<ulong, QueryStatus>>
         {
-            public ulong Id { get; set; }
+            public ulong GuildId { get; init; }
 
-            public List<ChannelDto> Channels { get; set; } = new();
+            public IReadOnlyList<ChannelDto> Channels { get; set; } = new List<ChannelDto>();
         }
 
         public record Handler(ClemBotContext _context)
@@ -42,7 +43,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
             public async Task<Result<ulong, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var guild = await _context.Guilds
-                    .Where(x => x.Id == request.Id)
+                    .Where(x => x.Id == request.GuildId)
                     .Include(y => y.Channels)
                     .FirstOrDefaultAsync();
 
@@ -82,7 +83,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                     {
                         Id = channel.Id,
                         Name = channel.Name,
-                        GuildId = request.Id
+                        GuildId = request.GuildId
                     };
                     _context.Channels.Add(channelEntity);
                     guild?.Channels?.Add(channelEntity);
@@ -90,7 +91,7 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
 
                 await _context.SaveChangesAsync();
 
-                return QueryResult<ulong>.Success(request.Id);
+                return QueryResult<ulong>.Success(request.GuildId);
             }
         }
     }

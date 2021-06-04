@@ -9,7 +9,7 @@ import discord
 import discord.ext.commands as commands
 
 import bot.extensions as ext
-import bot_secrets
+import bot.bot_secrets as bot_secrets
 from bot.consts import Colors
 from bot.messaging.events import Events
 

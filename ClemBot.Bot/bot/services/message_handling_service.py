@@ -10,7 +10,6 @@ from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
 from bot.data.message_repository import MessageRepository
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
-import bot_secrets
 
 log = logging.getLogger(__name__)
 
