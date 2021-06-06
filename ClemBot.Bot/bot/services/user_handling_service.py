@@ -5,7 +5,6 @@ from datetime import datetime
 import discord
 
 from bot.consts import Colors, DesignatedChannels
-from bot.data.user_repository import UserRepository
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
 
@@ -48,9 +47,6 @@ class UserHandlingService(BaseService):
     async def on_new_guild_init(self, guild):
         await self.load_users(guild)
 
-    async def add_user(self, user, guild_id: int) -> None:
-        await UserRepository().add_user(user, guild_id)
-
     async def notify_user_join(self, user: discord.Member):
         embed = discord.Embed(title='New User Joined', color=Colors.ClemsonOrange)
         embed.add_field(name='Username', value=self.get_full_name(user))
@@ -86,6 +82,4 @@ class UserHandlingService(BaseService):
         return f'{author.name}#{author.discriminator}'
 
     async def load_service(self) -> None:
-        for guild in self.bot.guilds:
-            log.info(f'Initializing members of {guild.name}')
-            await self.load_users(guild)
+        pass

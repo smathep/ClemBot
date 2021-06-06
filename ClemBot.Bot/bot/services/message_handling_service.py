@@ -7,7 +7,6 @@ from typing import Iterable
 import discord
 
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
-from bot.data.message_repository import MessageRepository
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
 
@@ -27,8 +26,6 @@ class MessageHandlingService(BaseService):
 
         # Primary entry point for handling commands
         await self.bot.process_commands(message)
-
-        await MessageRepository().add_message(message, datetime.datetime.utcnow())
 
         await self.bot.message_route.create_message(message.id,
                                                     message.content,
@@ -52,7 +49,6 @@ class MessageHandlingService(BaseService):
         log.info(f'Message edited in #{before.channel.name} By: \
             {self.get_full_name(before.author)} \nBefore: {before.content} \nAfter: {after.content}')
 
-        await MessageRepository().edit_message_content(after.id, after.content)
         await self.bot.message_route.edit_message(after.id, after.content)
 
         embed = discord.Embed(title=f':repeat: **Message Edited in #{before.channel.name}**', color=Colors.ClemsonOrange)
@@ -77,8 +73,6 @@ class MessageHandlingService(BaseService):
     @BaseService.Listener(Events.on_raw_message_edit)
     async def on_raw_message_edit(self, payload):
 
-        message_repo = MessageRepository()
-        message = await message_repo.get_message(payload.message_id)
         message = await self.bot.message_route.get_message(payload.message_id)
         channel = self.bot.get_channel(payload.channel_id)
 
@@ -87,7 +81,6 @@ class MessageHandlingService(BaseService):
                 log.info(f'Uncached message edited in #{channel.name} By: \
                     {message["userId"]} \nBefore: {message["content"]} \nAfter: {payload.data["content"]}')
 
-                await message_repo.edit_message_content(message['id'], payload.data['content'])
                 await self.bot.message_route.edit_message(message['id'], payload.data['content'])
 
                 embed = discord.Embed(title=f':repeat: **Uncached message edited in #{channel.name}**',
@@ -138,8 +131,6 @@ class MessageHandlingService(BaseService):
         log.info(f'Uncached message deleted in #{message.channel.name} by \
             {self.get_full_name(message.author)}: {message.content}')
 
-        await MessageRepository().set_message_deletion(message.id)
-
         embed = discord.Embed(title=f':wastebasket: **Message Deleted in #{message.channel.name}**',
                               color=Colors.ClemsonOrange)
 
@@ -157,14 +148,10 @@ class MessageHandlingService(BaseService):
     @BaseService.Listener(Events.on_raw_message_delete)
     async def on_raw_message_delete(self, payload):
 
-        message_repo = MessageRepository()
-        message = await message_repo.get_message(payload.message_id)
         message = await self.bot.message_route.get_message(payload.message_id)
         channel = self.bot.get_channel(payload.channel_id)
 
         log.info(f'Uncached message deleted id:{payload.message_id} in #{channel.name}')
-
-        await message_repo.set_message_deletion(payload.message_id)
 
         if message is not None:
             embed = discord.Embed(title=f':wastebasket: **Uncached message deleted in #{channel.name}**',

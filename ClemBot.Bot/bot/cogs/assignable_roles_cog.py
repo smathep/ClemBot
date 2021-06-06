@@ -6,9 +6,9 @@ import discord.ext.commands as commands
 from discord.ext.commands.errors import BadArgument
 
 import bot.extensions as ext
+from bot.clem_bot import ClemBot
 from bot.consts import Colors, Claims
 from bot.messaging.events import Events
-from bot.clem_bot import ClemBot
 
 log = logging.getLogger(__name__)
 

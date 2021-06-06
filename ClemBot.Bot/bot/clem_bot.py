@@ -10,16 +10,13 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from bot.api import *
 import bot.api as api
 import bot.cogs as cogs
 import bot.extensions as ext
 import bot.services as services
+from bot.api import *
 from bot.api.api_client import ApiClient
-import bot.bot_secrets as bot_secrets
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
-from bot.data.database import Database
-from bot.data.logout_repository import LogoutRepository
 from bot.errors import ClaimsAccessError
 from bot.messaging.events import Events
 from bot.messaging.messenger import Messenger
@@ -82,7 +79,6 @@ class ClemBot(commands.Bot):
 
         await self.change_presence(activity=discord.Game(name='Run !help'))
 
-        await Database(bot_secrets.secrets.database_name).create_database()
         await self.load_services()
 
         # Send the ready event AFTER services have been loaded so that the designated channel service is there
@@ -147,7 +143,6 @@ class ClemBot(commands.Bot):
             embed.add_field(name='Shutdown Time', value=time)
             embed.set_thumbnail(url=self.user.avatar_url)
             await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
-            await LogoutRepository().add_logout_date(datetime.datetime.utcnow())
         except Exception as e:
             log.error(f'Logout error embed failed with error {e}')
 

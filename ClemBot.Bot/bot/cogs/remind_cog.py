@@ -1,15 +1,16 @@
-from bot.consts import Colors
 import logging
-import discord
 
+import discord
 import discord.ext.commands as commands
 
 import bot.extensions as ext
-from bot.utils import converters
+from bot.consts import Colors
 from bot.messaging.events import Events
+from bot.utils import converters
 
 log = logging.getLogger(__name__)
 
+'''
 class RemindCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -59,3 +60,4 @@ class RemindCog(commands.Cog):
 
 def setup(bot):
     bot.add_cog(RemindCog(bot))
+'''

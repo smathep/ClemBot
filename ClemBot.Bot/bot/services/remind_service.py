@@ -1,18 +1,17 @@
-from bot.data.message_repository import MessageRepository
-from datetime import datetime
 import logging
+from datetime import datetime
 
 import discord
 
 from bot.consts import Colors
-from bot.utils import converters
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
-from bot.data.remind_repository import RemindRepository
+from bot.utils import converters
 
 log = logging.getLogger(__name__)
 
 
+"""
 class RemindService(BaseService):
     def __init__(self, *, bot):
         super().__init__(bot)
@@ -54,3 +53,4 @@ class RemindService(BaseService):
                 await self.reminder_callback(reminder['fk_userId'], reminder['fk_messageId'])
             else:
                 self.bot.scheduler.schedule_at(self.reminder_callback(reminder['fk_userId'], reminder['fk_messageId']), time=wait)
+"""

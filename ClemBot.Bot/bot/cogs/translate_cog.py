@@ -7,8 +7,8 @@ import discord
 import discord.ext.commands as commands
 from discord.ext.commands.errors import UserInputError
 
-import bot.extensions as ext
 import bot.bot_secrets as bot_secrets
+import bot.extensions as ext
 from bot.consts import Colors
 from bot.messaging.events import Events
 

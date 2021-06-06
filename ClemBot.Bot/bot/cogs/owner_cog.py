@@ -1,17 +1,11 @@
 import asyncio
-import json
 import logging
 from collections import deque
 
-import aiosqlite
 import discord
 import discord.ext.commands as commands
 
-import bot.bot_secrets as bot_secrets
-from bot.consts import Colors, DiscordLimits, OwnerDesignatedChannels, DesignatedChannels
-from bot.data.base_repository import BaseRepository
-from bot.data.designated_channel_repository import DesignatedChannelRepository
-from bot.data.message_repository import MessageRepository
+from bot.consts import Colors, OwnerDesignatedChannels, DesignatedChannels
 
 log = logging.getLogger(__name__)
 
@@ -39,13 +33,19 @@ class OwnerCog(commands.Cog):
     @owner.group(invoke_without_command=True, aliases=['channels'])
     @commands.is_owner()
     async def channel(self, ctx):
-        channel_repo = DesignatedChannelRepository()
 
-        embed = discord.Embed(title=f'Designated Channels', color=Colors.ClemsonOrange)
+        embed = discord.Embed(title=f'Owner Designated Channels', color=Colors.ClemsonOrange)
+
+        if len(list(DesignatedChannels)) == 0:
+            embed.add_field(name='No possible Owner designated channels', value='')
+            await ctx.send(embed=embed)
+            return
+
+        designated_channels = await self.bot.designated_channel_route.get_guild_all_designated_channels(ctx.guild.id)
 
         for i, channel in enumerate(OwnerDesignatedChannels):
             assigned_channels = []
-            for channel_id in await channel_repo.get_guild_designated_channels(channel.name, ctx.guild.id):
+            for channel_id in designated_channels.get(channel.name, []):
                 assigned_channels.append(ctx.bot.get_channel(channel_id))
 
             if len(assigned_channels) != 0:
@@ -71,17 +71,15 @@ class OwnerCog(commands.Cog):
             channel (discord.TextChannel): Channel to add
         """
 
-        channel_repo = DesignatedChannelRepository()
-
         if DesignatedChannels.has(channel_type):
             await ctx.send(f'The requested designated channel `{channel_type}` is not an owner channel')
             return
 
-        if channel.id in await channel_repo.get_guild_designated_channels(channel_type, ctx.guild.id):
+        if channel.id in await self.bot.designated_channel_route.get_guild_designated_channel_ids(ctx.guild.id, channel_type):
             await ctx.send(f'{channel.mention} already registered to `{channel_type}`')
             return
 
-        await channel_repo.register_designated_channel(channel_type, channel)
+        await self.bot.designated_channel_route.register_channel(channel.id, channel_type)
 
         embed = discord.Embed(
             title='Owner Designated Channel added',
@@ -102,17 +100,15 @@ class OwnerCog(commands.Cog):
             channel_type (str): Designated channel to remove the textchannel from
             channel (discord.TextChannel): Channel to unregister
         """
-        channel_repo = DesignatedChannelRepository()
-
         if DesignatedChannels.has(channel_type):
             await ctx.send(f'The requested designated channel `{channel_type}` is not an owner channel')
             return
 
-        if channel.id not in await channel_repo.get_guild_designated_channels(channel_type, ctx.guild.id):
+        if channel.id in await self.bot.designated_channel_route.get_guild_designated_channel_ids(ctx.guild.id, channel_type):
             await ctx.send(f'{channel.mention} is not registered to `{channel_type}`')
             return
 
-        await channel_repo.remove_from_designated_channel(channel_type, channel.id)
+        await self.bot.designated_channel_route.delete_channel(channel.id, channel_type)
 
         embed = discord.Embed(
             title='Owner Designated Channel deleted',
@@ -133,8 +129,11 @@ class OwnerCog(commands.Cog):
 
         embed.add_field(name='Users', value=sum(len(i.members) for i in self.bot.guilds), inline=False)
 
+
+        """
         messages = await MessageRepository().get_message_count()
         embed.add_field(name='Messages', value=messages, inline=False)
+        """
 
         await msg.delete()
         await ctx.send(embed=embed)
@@ -175,27 +174,7 @@ class OwnerCog(commands.Cog):
     @eval_bot.command(aliases=['db'])
     @commands.is_owner()
     async def database(self, ctx, *, query):
-        """Runs arbitrary sql queries on the db in readonly mode and returns the results"""
-
-        database_name = bot_secrets.secrets.database_name
-        db_path = f'database/{database_name}'
-        connect_mode = 'ro'
-        json_params = {
-            'indent': 2,
-            'separators': (',', ': ')
-        }
-
-        async with aiosqlite.connect(f'file:{db_path}?mode={connect_mode}', uri=True) as db:
-            async with db.execute(query) as c:
-                result = await BaseRepository().fetcthall_as_dict(c)
-
-        json_res = json.dumps(result, **json_params)
-
-        if len(json_res) > DiscordLimits.MessageLength:
-            await ctx.send('Query result greater then discord message length limit')
-            return
-
-        await ctx.send(f'```{json_res}```')
+        pass
 
     @count.command()
     @commands.is_owner()
