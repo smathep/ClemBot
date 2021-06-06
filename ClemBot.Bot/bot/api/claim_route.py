@@ -10,21 +10,21 @@ class ClaimRoute(BaseRoute):
     def __init__(self, api_client: ApiClient):
         super().__init__(api_client)
 
-    async def add_claim_mapping(self, claim: Claims, role_id: int):
+    async def add_claim_mapping(self, claim: Claims, role_id: int, **kwargs):
         json = {
             'RoleId': role_id,
             'Claim': claim
         }
 
-        await self._client.post('claimmappings', data=json)
+        await self._client.post('claimmappings', data=json, **kwargs)
 
-    async def remove_claim_mapping(self, claim: Claims, role_id: int):
+    async def remove_claim_mapping(self, claim: Claims, role_id: int, **kwargs):
         json = {
             'RoleId': role_id,
             'Claim': claim
         }
 
-        await self._client.delete('claimmappings', data=json)
+        await self._client.delete('claimmappings', data=json, **kwargs)
 
     async def get_claims_role(self, role_id):
         resp = await self._client.get(f'roles/{role_id}/claimmappings')
@@ -36,8 +36,8 @@ class ClaimRoute(BaseRoute):
 
     async def get_claims_user(self, user: discord.Member):
         claims = set()
-        for role_id in user.roles:
-            resp = await self._client.get(f'roles/{role_id}/claimmappings')
+        for role in user.roles:
+            resp = await self._client.get(f'roles/{role.id}/claimmappings')
 
             if resp.status != 200:
                 return None

@@ -104,7 +104,7 @@ class OwnerCog(commands.Cog):
             await ctx.send(f'The requested designated channel `{channel_type}` is not an owner channel')
             return
 
-        if channel.id in await self.bot.designated_channel_route.get_guild_designated_channel_ids(ctx.guild.id, channel_type):
+        if channel.id not in await self.bot.designated_channel_route.get_guild_designated_channel_ids(ctx.guild.id, channel_type):
             await ctx.send(f'{channel.mention} is not registered to `{channel_type}`')
             return
 
@@ -128,7 +128,6 @@ class OwnerCog(commands.Cog):
         embed.add_field(name='Guilds', value=len(self.bot.guilds), inline=False)
 
         embed.add_field(name='Users', value=sum(len(i.members) for i in self.bot.guilds), inline=False)
-
 
         """
         messages = await MessageRepository().get_message_count()
@@ -175,14 +174,6 @@ class OwnerCog(commands.Cog):
     @commands.is_owner()
     async def database(self, ctx, *, query):
         pass
-
-    @count.command()
-    @commands.is_owner()
-    async def messages(self, ctx, guild_id: int = None):
-        count = await MessageRepository().get_message_count(guild_id)
-        embed = discord.Embed(title='Current message count', color=Colors.ClemsonOrange)
-        embed.add_field(name=f'Guild: {guild_id}' if guild_id else 'Global', value=count)
-        await ctx.send(embed=embed)
 
     @count.command()
     @commands.is_owner()

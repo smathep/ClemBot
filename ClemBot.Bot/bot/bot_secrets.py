@@ -1,5 +1,6 @@
 import json
 import logging
+import typing as t
 import os
 
 from bot.errors import ConfigAccessError
@@ -12,7 +13,6 @@ class BotSecrets:
         self._client_token = None
         self._client_secret = None
         self._bot_token = None
-        self._database_name = None
         self._bot_prefix = None
         self._gifMe_token = None
         self._repl_url = None
@@ -24,6 +24,7 @@ class BotSecrets:
         self._azure_translate_key = None
         self._api_url = None
         self._api_key = None
+        self._bot_only = None
 
     @property
     def client_token(self) -> str:
@@ -83,16 +84,20 @@ class BotSecrets:
         self._bot_token = value
 
     @property
-    def database_name(self) -> str:
-        if not self._database_name:
-            return 'ClemBot'
-        return self._database_name
+    def bot_only(self) -> bool:
+        if not self._bot_only:
+            return False
+        return self._bot_only
 
-    @database_name.setter
-    def database_name(self, value: str) -> None:
-        if self._database_name:
-            raise ConfigAccessError(f'database_name has already been initialized')
-        self._database_name = f'{value}.sqlite'
+    @bot_only.setter
+    def bot_only(self, value) -> None:
+        if self.bot_only:
+            raise ConfigAccessError(f'bot_only has already been initialized')
+
+        if isinstance(value, str):
+            self._bot_only = bool(value)
+        else:
+            self._bot_only = value
 
     @property
     def bot_prefix(self) -> str:
@@ -220,8 +225,8 @@ class BotSecrets:
         self.client_token = secrets['ClientToken']
         self.client_secret = secrets['ClientSecret']
         self.bot_token = secrets['BotToken']
-        self.database_name = secrets['DatabaseName']
         self.bot_prefix = secrets['BotPrefix']
+        self.bot_only = secrets['BotOnly']
         self.gif_me_token = secrets['GifMeToken']
         self.repl_url = secrets['ReplUrl']
         self.github_url = secrets['GithubSourceUrl']
@@ -239,8 +244,8 @@ class BotSecrets:
         self.client_token = os.environ.get('CLIENT_TOKEN')
         self.client_secret = os.environ.get('CLIENT_SECRET')
         self.bot_token = os.environ.get('BOT_TOKEN')
-        self.database_name = os.environ.get('DATABASE_NAME')
         self.bot_prefix = os.environ.get('BOT_PREFIX')
+        self.bot_only = os.environ.get('BOT_ONLY')
         self.gif_me_token = os.environ.get('GIF_ME_TOKEN')
         self.repl_url = os.environ.get('REPL_URL')
         self.github_url = os.environ.get('GITHUB_URL')
@@ -252,5 +257,6 @@ class BotSecrets:
         self.api_key = os.environ.get('API_KEY')
 
         log.info('Production keys loaded')
+
 
 secrets = BotSecrets()

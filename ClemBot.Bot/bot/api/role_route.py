@@ -9,14 +9,14 @@ class RoleRoute(BaseRoute):
     def __init__(self, api_client: ApiClient):
         super().__init__(api_client)
 
-    async def create_role(self, role_id: int, name: int, is_admin: bool, guild_id: int):
+    async def create_role(self, role_id: int, name: int, is_admin: bool, guild_id: int, **kwargs):
         json = {
             'id': role_id,
             'name': name,
             'admin': is_admin,
             'guildId': guild_id
         }
-        await self._client.post('roles', data=json)
+        await self._client.post('roles', data=json, **kwargs)
 
     async def get_role(self, role_id: int):
         user = await self._client.get(f'roles/{role_id}')
@@ -26,25 +26,25 @@ class RoleRoute(BaseRoute):
 
         return user.value
 
-    async def edit_role(self, role_id: int, name: str, is_admin: bool):
+    async def edit_role(self, role_id: int, name: str, is_admin: bool, **kwargs):
         json = {
             'Id': role_id,
             'Name': name,
             'Admin': is_admin
         }
 
-        await self._client.patch('roles', data=json)
+        await self._client.patch('roles', data=json, **kwargs)
 
-    async def set_assignable(self, role_id: int, assignable: bool):
+    async def set_assignable(self, role_id: int, assignable: bool, **kwargs):
         json = {
             'Id': role_id,
             'Assignable': assignable
         }
 
-        await self._client.patch('roles', data=json)
+        await self._client.patch('roles', data=json, **kwargs)
 
-    async def remove_role(self, role_id: int):
-        await self._client.delete(f'roles/{role_id}')
+    async def remove_role(self, role_id: int, **kwargs):
+        await self._client.delete(f'roles/{role_id}', **kwargs)
 
     async def get_guilds_roles(self, guild_id: int) -> t.Optional[t.List[int]]:
         roles = await self._client.get(f'guilds/{guild_id}/roles')

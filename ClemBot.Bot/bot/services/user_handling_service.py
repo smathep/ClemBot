@@ -19,13 +19,12 @@ class UserHandlingService(BaseService):
     @BaseService.Listener(Events.on_user_joined)
     async def on_user_joined(self, user: discord.Member) -> None:
         log.info(f'"{user.name}:{user.id}" has joined guild "{user.guild.name}:{user.guild.id}"')
-        await self.add_user(user, user.guild.id)
 
         db_user = await self.bot.user_route.get_user(user.id)
         if not db_user:
             await self.bot.user_route.create_user(user.id, user.name)
 
-        await self.bot.user_route.add_user_guild(user.id, user.guild.id)
+        await self.bot.user_route.add_user_guild(user.id, user.guild.id, raise_on_error=True)
 
         await self.bot.user_route.update_roles(user.id, [r.id for r in user.roles])
 
@@ -42,10 +41,6 @@ class UserHandlingService(BaseService):
     @BaseService.Listener(Events.on_member_update)
     async def on_member_update(self, _, after):
         await self.bot.user_route.update_roles(after.id, [r.id for r in after.roles])
-
-    @BaseService.Listener(Events.on_new_guild_initialized)
-    async def on_new_guild_init(self, guild):
-        await self.load_users(guild)
 
     async def notify_user_join(self, user: discord.Member):
         embed = discord.Embed(title='New User Joined', color=Colors.ClemsonOrange)

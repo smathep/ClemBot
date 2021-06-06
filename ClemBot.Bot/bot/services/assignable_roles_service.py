@@ -13,11 +13,11 @@ class AssignableRolesService(BaseService):
 
     @BaseService.Listener(Events.on_assignable_role_add)
     async def assignable_role_add(self, role):
-        await self.bot.role_route.set_assignable(role.id, True)
+        await self.bot.role_route.set_assignable(role.id, True, raise_on_error=True)
 
     @BaseService.Listener(Events.on_assignable_role_remove)
     async def assignable_role_remove(self, role):
-        await self.bot.role_route.set_assignable(role.id, False)
+        await self.bot.role_route.set_assignable(role.id, False, raise_on_error=True)
 
     async def load_service(self):
         pass

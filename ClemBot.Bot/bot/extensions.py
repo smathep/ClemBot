@@ -46,7 +46,6 @@ def chainable(chainable: bool = True):
         else:
             setattr(func, 'chainable_output', chainable)
         return func
-
     return wrapper
 
 
@@ -57,7 +56,6 @@ def chainable_input(chainable: bool = True):
         else:
             setattr(func, 'chainable_input', chainable)
         return func
-
     return wrapper
 
 
@@ -74,7 +72,6 @@ def long_help(help_str: str):
         else:
             setattr(func, 'long_help', help_str)
         return func
-
     return wrapper
 
 
@@ -85,7 +82,6 @@ def short_help(help_str: str):
         else:
             setattr(func, 'short_help', help_str)
         return func
-
     return wrapper
 
 
@@ -96,7 +92,6 @@ def example(help_str: t.Union[str, t.Iterable[str]]):
         else:
             setattr(func, 'example', help_str)
         return func
-
     return wrapper
 
 
@@ -112,7 +107,6 @@ def ignore_claims_pre_invoke():
         else:
             setattr(func, 'ignore_claims_pre_invoke', True)
         return func
-
     return wrapper
 
 
@@ -126,7 +120,6 @@ def required_claims(*claims):
         else:
             setattr(func, 'claims', set_claims)
         return func
-
     return wrapper
 
 

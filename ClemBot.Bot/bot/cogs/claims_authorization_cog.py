@@ -79,7 +79,7 @@ class ClaimsAuthorizationCog(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        await self.bot.claim_route.add_claim_mapping(claim.name, role.id)
+        await self.bot.claim_route.add_claim_mapping(claim.name, role.id, raise_on_error=True)
 
         title = f'Claim: "{claim.name}" successfully added to role @{role.name} :white_check_mark:'
 
@@ -111,7 +111,7 @@ class ClaimsAuthorizationCog(commands.Cog):
 
         embed = discord.Embed(title=title, color=Colors.ClemsonOrange, description=desc)
         await ctx.send(embed=embed)
-        await self.bot.claim_route.remove_claim_mapping(claim.name, role.id)
+        await self.bot.claim_route.remove_claim_mapping(claim.name, role.id, raise_on_error=True)
 
     @claims.command(aliases=['get'])
     @ext.long_help(

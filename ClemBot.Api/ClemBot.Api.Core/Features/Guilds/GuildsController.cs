@@ -149,7 +149,7 @@ namespace ClemBot.Api.Core.Features.Guilds
 
         [HttpGet("bot/[controller]/{Id}/CustomPrefixes")]
         [BotMasterAuthorize]
-        public async Task<IActionResult> Tags([FromRoute] Bot.CustomPrefixes.Query query) =>
+        public async Task<IActionResult> CustomPrefixes([FromRoute] Bot.CustomPrefixes.Query query) =>
             await _mediator.Send(query) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),

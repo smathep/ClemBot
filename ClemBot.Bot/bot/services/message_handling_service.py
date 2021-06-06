@@ -1,4 +1,3 @@
-import datetime
 import json
 import logging
 import re
@@ -6,6 +5,7 @@ from typing import Iterable
 
 import discord
 
+import bot.bot_secrets as bot_secrets
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
@@ -26,6 +26,9 @@ class MessageHandlingService(BaseService):
 
         # Primary entry point for handling commands
         await self.bot.process_commands(message)
+
+        if bot_secrets.secrets.bot_only:
+            return
 
         await self.bot.message_route.create_message(message.id,
                                                     message.content,

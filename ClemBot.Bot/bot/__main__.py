@@ -43,7 +43,7 @@ def main():
 
     # check if this is a prod or a dev instance
     if bool(os.environ.get('PROD')):
-        bot_log.info('Production env var found, loading production enviroment')
+        bot_log.info('Production env var found, loading production environment')
         bot_secrets.secrets.load_production_secrets()
     else:
         try:

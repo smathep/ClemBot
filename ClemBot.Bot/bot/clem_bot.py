@@ -14,10 +14,11 @@ import bot.api as api
 import bot.cogs as cogs
 import bot.extensions as ext
 import bot.services as services
+import bot.bot_secrets as bot_secrets
 from bot.api import *
 from bot.api.api_client import ApiClient
 from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
-from bot.errors import ClaimsAccessError
+from bot.errors import ClaimsAccessError, BotOnlyRequestError
 from bot.messaging.events import Events
 from bot.messaging.messenger import Messenger
 from bot.utils.scheduler import Scheduler
@@ -37,8 +38,8 @@ class ClemBot(commands.Bot):
         # this super call is to pass the prefix up to the super class
         super().__init__(**kwargs)
 
-        # Create the api client and set its reconnect callback
-        self.api_client = ApiClient(self.on_reconnect)
+        self.api_client = ApiClient(reconnect_callback=self.on_reconnect,
+                                    bot_only=bot_secrets.secrets.bot_only)
 
         self.messenger: Messenger = messenger
         self.scheduler: Scheduler = scheduler
@@ -82,11 +83,12 @@ class ClemBot(commands.Bot):
         await self.load_services()
 
         # Send the ready event AFTER services have been loaded so that the designated channel service is there
-        embed = discord.Embed(title='Bot Started Up  :white_check_mark:', color=Colors.ClemsonOrange)
-        time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-        embed.add_field(name='Startup Time', value=time)
-        embed.set_thumbnail(url=self.user.avatar_url)
-        await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
+        if not bot_secrets.secrets.bot_only:
+            embed = discord.Embed(title='Bot Started Up  :white_check_mark:', color=Colors.ClemsonOrange)
+            time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            embed.add_field(name='Startup Time', value=time)
+            embed.set_thumbnail(url=self.user.avatar_url)
+            await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
 
         log.info(f'Logged on as {self.user}')
 
@@ -269,6 +271,12 @@ class ClemBot(commands.Bot):
             traceback (str) default= None: The string traceback of the throw error
         """
 
+        # Handle if the error is a bot only request error, this is only thrown when a request is attempted
+        # In BotOnly mode so we can safely log that it happened and then ignore it
+        if isinstance(e, BotOnlyRequestError):
+            log.info(f'Ignoring BotOnly mode error')
+            return
+
         # log the exception first thing so we can be sure we got it
         log.exception(e)
 
@@ -304,6 +312,7 @@ class ClemBot(commands.Bot):
 
     async def activate_service(self, service):
         log.info(f'Loading service: {service.__module__}')
+
         s = service(bot=self)
         try:
             await s.load_service()
@@ -314,9 +323,9 @@ class ClemBot(commands.Bot):
     def activate_route(self, client: ApiClient, route):
         log.info(f'Loading route: {route.__module__}')
         r = route(api_client=client)
-        # Here we remove the first 4 characters of the module name
-        # That's because __module__ gives us the full name e.g api.guild_route
-        # so we need to remove the api. to correctly set the attr name
+        # Here we remove the first 8 characters of the module name
+        # That's because __module__ gives us the full name e.g bot.api.guild_route
+        # so we need to remove the bot.api. to correctly set the attr name
         self.__setattr__(r.__module__[8:], r)
 
     async def load_services(self) -> None:

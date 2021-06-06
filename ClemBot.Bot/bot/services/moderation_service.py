@@ -21,7 +21,8 @@ class ModerationService(BaseService):
         await self.bot.moderation_route.insert_warn(guild_id=guild.id,
                                                     author_id=author.id,
                                                     subject_id=subject.id,
-                                                    reason=reason)
+                                                    reason=reason,
+                                                    raise_on_error=True)
 
     @BaseService.Listener(Events.on_bot_ban)
     async def on_bot_ban(self, guild, author: discord.Member, subject: discord.Member, reason):
@@ -31,7 +32,8 @@ class ModerationService(BaseService):
         await self.bot.moderation_route.insert_ban(guild_id=guild.id,
                                                    author_id=author.id,
                                                    subject_id=subject.id,
-                                                   reason=reason)
+                                                   reason=reason,
+                                                   raise_on_error=True)
 
     @BaseService.Listener(Events.on_bot_mute)
     async def on_bot_mute(self, guild: discord.Guild, author: discord.Member, subject: discord.Member, reason, duration):
@@ -43,7 +45,8 @@ class ModerationService(BaseService):
                                                               author_id=author.id,
                                                               subject_id=subject.id,
                                                               duration=duration.strftime('%Y-%m-%dT%H:%M:%S.%f'),
-                                                              reason=reason)
+                                                              reason=reason,
+                                                              raise_on_error=True)
 
         self.bot.scheduler.schedule_at(self._unmute_callback(subject, mute_id), time=duration)
 

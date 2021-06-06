@@ -18,21 +18,22 @@ class RoleHandlingService(BaseService):
         await self.bot.role_route.create_role(role.id,
                                               role.name,
                                               role.permissions.administrator,
-                                              role.guild.id)
+                                              role.guild.id,
+                                              raise_on_error=True)
 
     @BaseService.Listener(Events.on_new_guild_initialized)
     async def on_new_guild_init(self, guild: discord.Guild):
-        await self.bot.guild_route.update_guild_roles(guild.id, guild.roles)
+        await self.bot.guild_route.update_guild_roles(guild.id, guild.roles,)
 
     @BaseService.Listener(Events.on_guild_role_delete)
     async def on_role_delete(self, role):
         log.info(f'Role: {role.id} deleted in guild: {role.guild.id}')
-        await self.bot.role_route.remove_role(role.id)
+        await self.bot.role_route.remove_role(role.id, raise_on_error=True)
 
     @BaseService.Listener(Events.on_guild_role_update)
-    async def on_role_update(self, before, after: discord.Role):
+    async def on_role_update(self, before, after: discord.Role, **kwargs):
         log.info(f'Role: {after.id} updated in guild: {after.guild.id}')
-        await self.bot.role_route.edit_role(after.id, after.name, after.permissions.administrator)
+        await self.bot.role_route.edit_role(after.id, after.name, after.permissions.administrator, **kwargs)
 
     async def load_service(self):
         pass

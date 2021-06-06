@@ -7,6 +7,7 @@ import aiohttp
 
 import bot.bot_secrets as bot_secrets
 from bot.consts import Urls
+from bot.errors import ApiClientRequestError, BotOnlyRequestError
 
 log = logging.getLogger(__name__)
 
@@ -30,10 +31,12 @@ class HttpRequestType:
 
 class ApiClient:
 
-    def __init__(self, reconnect_callback=None):
+    def __init__(self, *, reconnect_callback=None, bot_only: bool = False):
         self.auth_token: str = None
         self.session: aiohttp.ClientSession = None
         self.connected: bool = False
+
+        self.bot_only = bot_only
 
         # Create an empty async method so our callback doesnt throw when we await it
         async def async_stub():
@@ -64,6 +67,11 @@ class ApiClient:
             return resp_json['token']
 
     async def _authorize(self):
+
+        if self.bot_only:
+            log.info('Bot in bot_only mode, skipping Api authorization')
+            return
+
         headers = {
             'Accept': '*/*'
         }
@@ -110,6 +118,10 @@ class ApiClient:
         await self.session.close()
 
     async def _request(self, http_type: str, endpoint, **kwargs):
+
+        if self.bot_only:
+            raise BotOnlyRequestError("Request Failed: Bot is in bot_only mode")
+
         log.info(f'HTTP {http_type} Request initializing to route: {endpoint}')
         if 'data' in kwargs:
             data = json.dumps(kwargs['data'], indent=2)
@@ -127,10 +139,13 @@ class ApiClient:
                 return Result(resp.status, None)
 
             res = Result(resp.status, await resp.json())
-            log.info(f'Result for HTTP {http_type} at endpoint: {endpoint}\n{res}')
-            return res
+
+        log.info(f'Result for HTTP {http_type} at endpoint: {endpoint}\n{res}')
+        return res
 
     async def _request_or_reconnect(self, http_type: str, endpoint, **kwargs):
+
+        raise_on_error = kwargs.pop('raise_on_error', False)
 
         try:
             resp = await self._request(http_type, endpoint, **kwargs)
@@ -146,11 +161,16 @@ class ApiClient:
             log.warning(f'Request at endpoint: {endpoint} Failed with status code {resp.status}. Attempting to Reconnect to API...')
             await self._reconnect()
 
-        if not self.connected:
-            raise ConnectionError('Reconnecting to ClemBot.Api Failed')
+            if not self.connected:
+                raise ConnectionError('Reconnecting to ClemBot.Api Failed')
 
-        log.info(f'Retrying failed request at endpoint: {endpoint}')
-        return await self._request(http_type, endpoint, **kwargs)
+            log.info(f'Retrying failed request at endpoint: {endpoint}')
+            return await self._request(http_type, endpoint, **kwargs)
+
+        if raise_on_error:
+            raise ApiClientRequestError(f'Request at endpoint: {endpoint} Failed with status code {resp.status}')
+
+        return resp
 
     async def get(self, endpoint: str, **kwargs):
         return await self._request_or_reconnect(HttpRequestType.get, endpoint, **kwargs)

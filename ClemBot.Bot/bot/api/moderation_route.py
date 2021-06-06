@@ -32,7 +32,8 @@ class ModerationRoute(BaseRoute):
                          guild_id: int,
                          author_id: int,
                          subject_id: int,
-                         reason: str) -> t.Optional[int]:
+                         reason: str,
+                         **kwargs) -> t.Optional[int]:
         json = {
             'GuildId': guild_id,
             'AuthorId': author_id,
@@ -41,7 +42,7 @@ class ModerationRoute(BaseRoute):
             'Type': Infractions.ban
         }
 
-        resp = await self._client.post('infractions', data=json)
+        resp = await self._client.post('infractions', data=json, **kwargs)
 
         if resp.status != 200:
             return None
@@ -53,7 +54,8 @@ class ModerationRoute(BaseRoute):
                           author_id: int,
                           subject_id: int,
                           reason: t.Optional[str] = None,
-                          duration: datetime) -> t.Optional[int]:
+                          duration: datetime,
+                          **kwargs) -> t.Optional[int]:
         json = {
             'GuildId': guild_id,
             'AuthorId': author_id,
@@ -64,7 +66,7 @@ class ModerationRoute(BaseRoute):
             'Active': True
         }
 
-        resp = await self._client.post('infractions', data=json)
+        resp = await self._client.post('infractions', data=json, **kwargs)
 
         if resp.status != 200:
             return None
@@ -75,7 +77,8 @@ class ModerationRoute(BaseRoute):
                           guild_id: int,
                           author_id: int,
                           subject_id: int,
-                          reason: str) -> t.Optional[int]:
+                          reason: str,
+                          **kwargs) -> t.Optional[int]:
         json = {
             'GuildId': guild_id,
             'AuthorId': author_id,
@@ -83,15 +86,15 @@ class ModerationRoute(BaseRoute):
             'Reason': reason,
             'Type': Infractions.warn
         }
-        resp = await self._client.post('infractions', data=json)
+        resp = await self._client.post('infractions', data=json, **kwargs)
 
         if resp.status != 200:
             return None
 
         return resp.value['infractionId']
 
-    async def delete_infraction(self, infraction_id: int) -> int:
-        resp = await self._client.delete(f'infractions/{infraction_id}')
+    async def delete_infraction(self, infraction_id: int, **kwargs) -> int:
+        resp = await self._client.delete(f'infractions/{infraction_id}', **kwargs)
         return resp.value
 
     async def deactivate_mute(self, infraction_id: int) -> int:

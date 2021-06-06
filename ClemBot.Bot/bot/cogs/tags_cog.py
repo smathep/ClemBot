@@ -116,12 +116,12 @@ class TagCog(commands.Cog):
 
         content = discord.utils.escape_mentions(content)
 
-        if await self.bot.get_tag(ctx.guild.id, name):
+        if await self.bot.tag_route.get_tag(ctx.guild.id, name):
             embed = discord.Embed(title=f'Error: Tag "{name}" already exists in this server', color=Colors.Error)
             await ctx.send(embed=embed)
             return
 
-        await self.bot.tag_route.create_tag(name, content, ctx.guild.id, ctx.author.id)
+        await self.bot.tag_route.create_tag(name, content, ctx.guild.id, ctx.author.id, raise_on_error=True)
 
         embed = discord.Embed(title=":white_check_mark: Tag successfully added", color=Colors.ClemsonOrange)
         embed.add_field(name="Name", value=name, inline=True)
@@ -194,7 +194,7 @@ class TagCog(commands.Cog):
     async def _delete_tag(self, name, ctx):
         content = await self.bot.tag_route.get_tag_content(ctx.guild.id, name)
 
-        await self.bot.tag_route.delete_tag(ctx.guild.id, name)
+        await self.bot.tag_route.delete_tag(ctx.guild.id, name, raise_on_error=True)
 
         embed = discord.Embed(title=':white_check_mark: Tag successfully deleted', color=Colors.ClemsonOrange)
         embed.add_field(name='Name', value=name, inline=True)
