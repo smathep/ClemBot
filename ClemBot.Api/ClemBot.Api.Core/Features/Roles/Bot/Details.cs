@@ -23,6 +23,8 @@ namespace ClemBot.Api.Core.Features.Roles.Bot
 
             public ulong GuildId { get; init; }
 
+            public bool Admin { get; init; }
+
             public bool IsAssignable { get; init; }
         }
 
@@ -44,7 +46,8 @@ namespace ClemBot.Api.Core.Features.Roles.Bot
                     Id = role.Id,
                     Name = role.Name,
                     GuildId = role.GuildId,
-                    IsAssignable = role.IsAssignable ?? false
+                    IsAssignable = role.IsAssignable ?? false,
+                    Admin = role.Admin
                 });
             }
         }

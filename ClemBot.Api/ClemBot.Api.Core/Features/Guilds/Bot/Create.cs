@@ -22,7 +22,6 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
         }
 
         public class Command : IRequest<Result<Guild, QueryStatus>>
-
         {
             public ulong Id { get; set; }
 
@@ -33,7 +32,11 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
         {
             public async Task<Result<Guild, QueryStatus>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var guild = new Guild { Id = request.Id, Name = request.Name };
+                var guild = new Guild
+                {
+                    Id = request.Id,
+                    Name = request.Name
+                };
 
                 if (await _context.Guilds.Where(x => x.Id == guild.Id).AnyAsync())
                 {

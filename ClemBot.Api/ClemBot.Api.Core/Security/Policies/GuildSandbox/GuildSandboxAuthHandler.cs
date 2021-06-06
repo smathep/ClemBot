@@ -45,7 +45,7 @@ namespace ClemBot.Api.Core.Security.Policies.GuildSandbox
             if (model is null)
             {
                 _logger.LogError("Auth Handler {this} received invalid Http Request Body " +
-                                       "(Does your command inherit from {model}", GetType(), typeof(GuildSandboxModel));
+                                 "(Does your command inherit from {model}", GetType(), typeof(GuildSandboxModel));
                 return;
             }
 

@@ -16,13 +16,15 @@ namespace ClemBot.Api.Core.Security.Policies.BotMaster
             _requestContext = requestContext.HttpContext;
         }
 
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context,
             BotMasterRequirement requirement)
         {
             if (context.User.HasClaim(c => c.Type == Claims.BotApiKey))
             {
                 context.Succeed(requirement);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -7,8 +7,8 @@ from discord.ext.commands.errors import BadArgument
 
 import bot.extensions as ext
 from bot.consts import Colors, Claims
-from bot.data.role_repository import RoleRepository
 from bot.messaging.events import Events
+from bot.clem_bot import ClemBot
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 class AssignableRolesCog(commands.Cog):
     """this is a test cog comment"""
 
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: ClemBot) -> None:
         self.bot = bot
 
     @ext.group(invoke_without_command=True, aliases=['role'], case_insensitive=True)
@@ -31,7 +31,7 @@ class AssignableRolesCog(commands.Cog):
         try:
             role = await commands.RoleConverter().convert(ctx, input_role)
 
-            if not await self.check_role_assignable(ctx, input_role):
+            if not await self.bot.role_route.check_role_assignable(role.id):
                 raise BadArgument
 
             await self.set_role(ctx, role)
@@ -40,24 +40,23 @@ class AssignableRolesCog(commands.Cog):
             await self.find_possible_roles(ctx, input_role)
 
     async def check_role_assignable(self, ctx, input_role: str) -> bool:
-        assignable_roles = await RoleRepository().get_assignable_roles(ctx.guild.id)
+        assignable_roles = await self.bot.role_route.get_guilds_assignable_roles(ctx.guild.id)
         return input_role in [ctx.guild.get_role(i['id']) for i in assignable_roles]
 
     async def find_possible_roles(self, ctx, input_role: str):
         # Casefold the roles
         str_input_role = str(input_role).casefold()
 
-        assignable_roles = await RoleRepository().get_assignable_roles(ctx.guild.id)
-        role_list = [ctx.guild.get_role(i['id']) for i in assignable_roles]
+        assignable_roles = await self.bot.role_route.get_guilds_assignable_roles(ctx.guild.id)
 
-        str_role_list = [str(i).casefold() for i in role_list]  # Case-fold to do case insensitive matching
+        str_role_list = [str(i).casefold() for i in assignable_roles]  # Case-fold to do case insensitive matching
 
         # Compare input_role to role_list entries for matches
         matching_roles = []
 
         for j, val_j in enumerate(str_role_list):
             if str_input_role == val_j:
-                matching_roles.append(role_list[j])  # matching_roles.append(j)
+                matching_roles.append(assignable_roles[j])  # matching_roles.append(j)
 
         role_count = len(matching_roles)
 
@@ -138,7 +137,7 @@ class AssignableRolesCog(commands.Cog):
         try:
             reaction, _ = await ctx.bot.wait_for("reaction_add", timeout=10.0, check=predicate)
         except asyncio.TimeoutError:
-            embed.add_field(name='Request Timeout:', value='User failed to respond in the alloted time', inline='false')
+            embed.add_field(name='Request Timeout:', value='User failed to respond in the allotted time', inline=False)
             await mes.edit(embed=embed)
             await mes.clear_reactions()  # Remove reactions so use doesn't try to respond after timeout.
             return
@@ -148,11 +147,9 @@ class AssignableRolesCog(commands.Cog):
         await mes.delete()  # Delete message now that user has made a successful choice
 
     async def send_role_list(self, ctx, title: str):
-        role_repo = RoleRepository()
-
         CHUNK_SIZE = 15
 
-        results = await role_repo.get_assignable_roles(ctx.guild.id)
+        results = await self.bot.role_route.get_guilds_assignable_roles(ctx.guild.id)
 
         embed = discord.Embed(title=title, color=Colors.ClemsonOrange)
 
@@ -165,13 +162,12 @@ class AssignableRolesCog(commands.Cog):
         await ctx.send(embed=embed)
 
     async def set_role(self, ctx, role: discord.Role = None) -> None:
-        role_repo = RoleRepository()
 
-        if not await role_repo.check_is_role_assignable(role.id):
+        if not await self.bot.role_route.check_role_assignable(role.id):
             await self.send_role_list(ctx, f'@{str(role)} is not an assignable role')
             return
 
-        if role.id in [role.id for role in ctx.author.roles]:
+        if role.id in [r.id for r in ctx.author.roles]:
             await self.remove_role(ctx, role)
         else:
             await self.add_role(ctx, role)

@@ -322,7 +322,6 @@ class ClemBot(commands.Bot):
         # Here we remove the first 4 characters of the module name
         # That's because __module__ gives us the full name e.g api.guild_route
         # so we need to remove the api. to correctly set the attr name
-        print(r.__module__)
         self.__setattr__(r.__module__[8:], r)
 
     async def load_services(self) -> None:

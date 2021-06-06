@@ -15,16 +15,18 @@ namespace ClemBot.Api.Core.Features.Roles.Bot
             public Validator()
             {
                 RuleFor(p => p.Id).NotNull();
-                RuleFor(p => p.Name).NotNull();
             }
         }
 
         public class Command : IRequest<Result<ulong, QueryStatus>>
-
         {
             public ulong Id { get; set; }
 
-            public string Name { get; set; } = null!;
+            public string? Name { get; set; } = null;
+
+            public bool? Admin { get; set; } = null;
+
+            public bool? Assignable { get; set; } = null;
         }
 
         public record Handler(ClemBotContext _context) : IRequestHandler<Command, Result<ulong, QueryStatus>>
@@ -39,7 +41,10 @@ namespace ClemBot.Api.Core.Features.Roles.Bot
                     return QueryResult<ulong>.NotFound();
                 }
 
-                role.Name = request.Name;
+                role.Name = request.Name ?? role.Name;
+                role.Admin = request.Admin ?? role.Admin;
+                role.IsAssignable = request.Assignable ?? role.IsAssignable;
+
                 await _context.SaveChangesAsync();
 
                 return QueryResult<ulong>.Success(role.Id);
