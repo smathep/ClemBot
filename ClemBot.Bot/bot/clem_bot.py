@@ -38,7 +38,8 @@ class ClemBot(commands.Bot):
         # this super call is to pass the prefix up to the super class
         super().__init__(**kwargs)
 
-        self.api_client = ApiClient(reconnect_callback=self.on_reconnect,
+        self.api_client = ApiClient(reconnect_callback=self.on_backend_reconnect,
+                                    disconnect_callback=self.on_backend_disconnect,
                                     bot_only=bot_secrets.secrets.bot_only)
 
         self.messenger: Messenger = messenger
@@ -82,21 +83,32 @@ class ClemBot(commands.Bot):
 
         await self.load_services()
 
-        # Send the ready event AFTER services have been loaded so that the designated channel service is there
-        if not bot_secrets.secrets.bot_only:
-            embed = discord.Embed(title='Bot Started Up  :white_check_mark:', color=Colors.ClemsonOrange)
-            time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-            embed.add_field(name='Startup Time', value=time)
-            embed.set_thumbnail(url=self.user.avatar_url)
-            await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
+        embed = discord.Embed(title='Bot Started Up  :white_check_mark:', color=Colors.ClemsonOrange)
+        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
+
+        await self.send_startup_log_embed(embed)
 
         log.info(f'Logged on as {self.user}')
 
-    async def on_reconnect(self):
+    async def on_backend_reconnect(self):
         embed = discord.Embed(title='Bot Reconnected to ClemBot.Api  :white_check_mark:', color=Colors.ClemsonOrange)
         embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
-        await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
+
+        await self.send_startup_log_embed(embed)
+
+    async def on_backend_disconnect(self):
+        embed = discord.Embed(title='Bot Disconnected from ClemBot.Api  :no_entry_sign:', color=Colors.ClemsonOrange)
+        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
+
+        await self.send_startup_log_embed(embed)
+
+    async def send_startup_log_embed(self, embed):
+        for channel_id in bot_secrets.secrets.startup_log_channel_ids:
+            channel = await self.fetch_channel(channel_id)
+            await channel.send(embed=embed)
 
     async def command_claims_check(self, ctx: commands.Context):
         """
@@ -141,10 +153,9 @@ class ClemBot(commands.Bot):
         try:
             log.info('Sending shutdown embed')
             embed = discord.Embed(title='Bot Shutting down  :white_check_mark:', color=Colors.ClemsonOrange)
-            time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-            embed.add_field(name='Shutdown Time', value=time)
-            embed.set_thumbnail(url=self.user.avatar_url)
-            await self.messenger.publish(Events.on_broadcast_designated_channel, DesignatedChannels.startup_log, embed)
+            embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
+            await self.send_startup_log_embed(embed)
         except Exception as e:
             log.error(f'Logout error embed failed with error {e}')
 

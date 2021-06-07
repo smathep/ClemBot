@@ -31,7 +31,11 @@ class HttpRequestType:
 
 class ApiClient:
 
-    def __init__(self, *, reconnect_callback=None, bot_only: bool = False):
+    def __init__(self, *,
+                 reconnect_callback=None,
+                 disconnect_callback=None,
+                 bot_only: bool = False):
+
         self.auth_token: str = None
         self.session: aiohttp.ClientSession = None
         self.connected: bool = False
@@ -43,6 +47,7 @@ class ApiClient:
             pass
 
         self.reconnect_callback = reconnect_callback or async_stub
+        self.disconnect_callback = disconnect_callback or async_stub
 
     @staticmethod
     def _url_for(url: str):
@@ -151,6 +156,9 @@ class ApiClient:
             resp = await self._request(http_type, endpoint, **kwargs)
         except aiohttp.client_exceptions.ClientConnectorError as e:
             log.error(f'Request to ClemBot.Api Failed: No server found')
+            if self.connected:
+                await self.disconnect_callback()
+            self.connected = False
             raise e
 
         if resp.status == 200:

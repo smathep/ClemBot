@@ -4,7 +4,6 @@ namespace ClemBot.Api.Data.Enums
     {
         message_log,
         moderation_log,
-        startup_log,
         user_join_log,
         user_leave_log,
         starboard,

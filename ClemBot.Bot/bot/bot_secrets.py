@@ -25,6 +25,7 @@ class BotSecrets:
         self._api_url = None
         self._api_key = None
         self._bot_only = None
+        self._startup_log_channel_ids = None
 
     @property
     def client_token(self) -> str:
@@ -162,7 +163,7 @@ class BotSecrets:
     @property
     def weather_key(self) -> str:
         if not self._weather_key:
-            raise ConfigAccessError(f'weather_key has not been intialized')
+            raise ConfigAccessError(f'weather_key has not been initialized')
         return self._weather_key
 
     @weather_key.setter
@@ -172,9 +173,21 @@ class BotSecrets:
         self._weather_key = value
 
     @property
+    def startup_log_channel_ids(self) -> t.List[int]:
+        if not self._startup_log_channel_ids:
+            raise ConfigAccessError(f'startup_log_channel_ids has not been initialized')
+        return self._startup_log_channel_ids
+
+    @startup_log_channel_ids.setter
+    def startup_log_channel_ids(self, value: t.List[int]):
+        if self._startup_log_channel_ids:
+            raise ConfigAccessError(f'startup_log_channel_ids has already been initialized')
+        self._startup_log_channel_ids = value
+
+    @property
     def geocode_key(self) -> str:
         if not self._geocode_key:
-            raise ConfigAccessError(f'geocode_key has not been intialized')
+            raise ConfigAccessError(f'geocode_key has not been initialized')
         return self._geocode_key
 
     @geocode_key.setter
@@ -227,6 +240,7 @@ class BotSecrets:
         self.bot_token = secrets['BotToken']
         self.bot_prefix = secrets['BotPrefix']
         self.bot_only = secrets['BotOnly']
+        self.startup_log_channel_ids = secrets['StartupLogChannelIds']
         self.gif_me_token = secrets['GifMeToken']
         self.repl_url = secrets['ReplUrl']
         self.github_url = secrets['GithubSourceUrl']
@@ -245,6 +259,7 @@ class BotSecrets:
         self.client_secret = os.environ.get('CLIENT_SECRET')
         self.bot_token = os.environ.get('BOT_TOKEN')
         self.bot_prefix = os.environ.get('BOT_PREFIX')
+        self.startup_log_channel_ids = os.environ.get('STARTUP_LOG_CHANNEL_IDS')
         self.bot_only = os.environ.get('BOT_ONLY')
         self.gif_me_token = os.environ.get('GIF_ME_TOKEN')
         self.repl_url = os.environ.get('REPL_URL')
