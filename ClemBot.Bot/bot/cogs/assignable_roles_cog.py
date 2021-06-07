@@ -12,6 +12,8 @@ from bot.messaging.events import Events
 
 log = logging.getLogger(__name__)
 
+ROLE_LIST_CHUNK_SIZE = 15
+
 
 class AssignableRolesCog(commands.Cog):
     """this is a test cog comment"""
@@ -147,14 +149,13 @@ class AssignableRolesCog(commands.Cog):
         await mes.delete()  # Delete message now that user has made a successful choice
 
     async def send_role_list(self, ctx, title: str):
-        CHUNK_SIZE = 15
 
         results = await self.bot.role_route.get_guilds_assignable_roles(ctx.guild.id)
 
         embed = discord.Embed(title=title, color=Colors.ClemsonOrange)
 
         if results:
-            for chunk in self.chunk_list([role['name'] for role in results], CHUNK_SIZE):
+            for chunk in self.chunk_list([role['name'] for role in results], ROLE_LIST_CHUNK_SIZE):
                 embed.add_field(name='Available:', value='\n'.join(chunk), inline=True)
         else:
             embed.add_field(name='Available:', value='No currently assignable roles.')

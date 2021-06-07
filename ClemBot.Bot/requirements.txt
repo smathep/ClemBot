@@ -11,6 +11,7 @@ certifi==2020.6.20
 chardet==3.0.4
 colorama==0.4.3
 contextlib2==0.6.0
+dataclasses-json==0.5.3
 dateutils==0.6.8
 discord.py==1.6.0
 distlib==0.3.1
@@ -64,7 +65,6 @@ smmap==3.0.2
 stevedore==1.32.0
 toml==0.10.1
 typed-ast==1.4.1
-typing-extensions==3.7.4.2
 urllib3==1.25.9
 virtualenv==20.0.31
 webencodings==0.5.1

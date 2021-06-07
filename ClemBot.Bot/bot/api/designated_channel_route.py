@@ -9,23 +9,25 @@ class DesignatedChannelRoute(BaseRoute):
 
     async def register_channel(self,
                                channel_id: int,
-                               designation: str):
+                               designation: str,
+                               **kwargs):
         json = {
             'ChannelId': channel_id,
             'Designation': designation
         }
 
-        return await self._client.post('designatedchannels', data=json)
+        return await self._client.post('designatedchannels', data=json, **kwargs)
 
     async def delete_channel(self,
                              channel_id: int,
-                             designation: str):
+                             designation: str,
+                             **kwargs):
         json = {
             'ChannelId': channel_id,
             'Designation': designation
         }
 
-        return await self._client.delete('designatedchannels', data=json)
+        return await self._client.delete('designatedchannels', data=json, **kwargs)
 
     async def get_guild_designated_channel_ids(self,
                                                guild_id: int,

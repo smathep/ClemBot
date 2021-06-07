@@ -80,7 +80,7 @@ class DesignatedChannelsCog(commands.Cog):
             await ctx.send(f'{channel.mention} already registered to `{channel_type}`')
             return
 
-        await self.bot.designated_channel_route.register_channel(channel.id, channel_type)
+        await self.bot.designated_channel_route.register_channel(channel.id, channel_type, raise_on_error=True)
 
         embed = discord.Embed(
             title='Designated Channel added',
@@ -123,7 +123,7 @@ class DesignatedChannelsCog(commands.Cog):
             await ctx.send(f'{channel.mention} is not registered to `{channel_type}`')
             return
 
-        await self.bot.designated_channel_route.delete_channel(channel.id, channel_type)
+        await self.bot.designated_channel_route.delete_channel(channel.id, channel_type, raise_on_error=True)
 
         embed = discord.Embed(
             title='Designated Channel deleted',

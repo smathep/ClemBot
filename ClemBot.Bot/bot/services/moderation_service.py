@@ -63,7 +63,7 @@ class ModerationService(BaseService):
         if not author:
             author = self.bot.user
 
-        await self.bot.moderation_route.deactivate_mute(mute_id)
+        await self.bot.moderation_route.deactivate_mute(mute_id, raise_on_error=True)
 
         if mute_role not in subject.roles:
             return

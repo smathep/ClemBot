@@ -31,9 +31,9 @@ class RoleHandlingService(BaseService):
         await self.bot.role_route.remove_role(role.id, raise_on_error=True)
 
     @BaseService.Listener(Events.on_guild_role_update)
-    async def on_role_update(self, before, after: discord.Role, **kwargs):
+    async def on_role_update(self, before, after: discord.Role):
         log.info(f'Role: {after.id} updated in guild: {after.guild.id}')
-        await self.bot.role_route.edit_role(after.id, after.name, after.permissions.administrator, **kwargs)
+        await self.bot.role_route.edit_role(after.id, after.name, after.permissions.administrator, raise_on_error=True)
 
     async def load_service(self):
         pass

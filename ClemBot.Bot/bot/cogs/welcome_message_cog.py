@@ -39,7 +39,7 @@ class WelcomeMessageCog(commands.Cog):
     @ext.short_help('Sets the welcome message')
     @ext.example('welcome set welcome to our amazing server')
     async def set(self, ctx, *, content):
-        await self.bot.welcome_message_route.set_welcome_message(ctx.guild.id, content)
+        await self.bot.welcome_message_route.set_welcome_message(ctx.guild.id, content, raise_on_error=True)
 
         embed = discord.Embed(title='Server welcome message set  :white_check_mark:', color=Colors.ClemsonOrange)
         await ctx.send(embed=embed)
@@ -58,7 +58,7 @@ class WelcomeMessageCog(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        await self.bot.welcome_message_route.set_welcome_message(ctx.guild.id, None)
+        await self.bot.welcome_message_route.set_welcome_message(ctx.guild.id, None, raise_on_error=True)
         embed = discord.Embed(title='Server welcome message deleted  :white_check_mark:', color=Colors.ClemsonOrange)
         await ctx.send(embed=embed)
 

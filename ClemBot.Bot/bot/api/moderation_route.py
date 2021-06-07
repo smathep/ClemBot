@@ -97,8 +97,8 @@ class ModerationRoute(BaseRoute):
         resp = await self._client.delete(f'infractions/{infraction_id}', **kwargs)
         return resp.value
 
-    async def deactivate_mute(self, infraction_id: int) -> int:
-        resp = await self._client.patch(f'infractions/{infraction_id}/deactivate')
+    async def deactivate_mute(self, infraction_id: int, **kwargs) -> int:
+        resp = await self._client.patch(f'infractions/{infraction_id}/deactivate', **kwargs)
 
         if resp.status != 200:
             return None
