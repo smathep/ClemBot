@@ -9,9 +9,11 @@ namespace ClemBot.Api.Core.Security.Policies.GuildSandbox
     {
         public const string POLICY_PREFIX = Policies.GuildSandbox;
 
+        /// <inheritdoc cref="IPolicyParser{T}.Serialize"/>
         public string Serialize(IEnumerable<BotAuthClaims>? t)
             => $"{POLICY_PREFIX}{string.Join(';', t ?? new List<BotAuthClaims>())}";
 
+        /// <inheritdoc cref="IPolicyParser{T}.Deserialize"/>
         public IEnumerable<BotAuthClaims>? Deserialize(string val)
         {
             if (!val.StartsWith(POLICY_PREFIX))

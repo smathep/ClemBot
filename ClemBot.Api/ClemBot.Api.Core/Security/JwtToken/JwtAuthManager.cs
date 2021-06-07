@@ -18,6 +18,7 @@ namespace ClemBot.Api.Core.Security.JwtToken
             _secret = Encoding.ASCII.GetBytes(_jwtTokenConfig.Secret);
         }
 
+        /// <inheritdoc cref="IJwtAuthManager.GenerateToken"/>
         public string GenerateToken(IEnumerable<Claim> claims, DateTime now)
         {
             var tokenDescriptor = new SecurityTokenDescriptor

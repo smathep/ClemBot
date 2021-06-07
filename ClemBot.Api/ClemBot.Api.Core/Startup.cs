@@ -52,16 +52,21 @@ namespace ClemBot.Api.Core
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
+            // Get Bots api key to check requests for from config
             var apiKey = Configuration["BotApiKey"];
             services.AddSingleton(new ApiKey() { Key = apiKey });
 
+            // Generate JWT token with random access key
             var jwtTokenConfig = Configuration.GetSection("JwtTokenConfig").Get<JwtTokenConfig>();
             jwtTokenConfig.Secret = Guid.NewGuid().ToString();
             services.AddSingleton(jwtTokenConfig);
 
+            // Add JWT generator to DI
             services.AddScoped<IJwtAuthManager, JwtAuthManager>();
+
             services.AddMediatR(typeof(Startup));
 
+            // Specify Swagger startup options
             services.AddSwaggerGen(o => {
                 o.SwaggerDoc("v1", new OpenApiInfo
                 {
@@ -77,14 +82,17 @@ namespace ClemBot.Api.Core
                 o.CustomSchemaIds(type => type.ToString());
             });
 
+            // Grab connection string from config
             var connectionString = Configuration["ClemBotConnectionString"];
 
+            // Set the db context for DI injection
             services.AddDbContext<ClemBotContext>(options =>
                 options.UseNpgsql(connectionString));
 
             services.AddHttpClient();
             services.AddHttpContextAccessor();
 
+            // Initialize the Authentication middleware
             services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -102,12 +110,9 @@ namespace ClemBot.Api.Core
             }
             );
 
-            services.AddAuthorization(options => {
-                options.AddPolicy(Policies.BotMaster, policy => {
-                    policy.RequireClaim(Claims.BotApiKey);
-                });
-            });
+            services.AddAuthorization();
 
+            // Add authorization policy providers
             services.AddScoped<IAuthorizationHandler, BotMasterAuthHandler>();
             services.AddScoped<IAuthorizationHandler, GuildSandboxAuthHandler>();
             services.AddSingleton<IAuthorizationPolicyProvider, GuildSandboxPolicyProvider>();

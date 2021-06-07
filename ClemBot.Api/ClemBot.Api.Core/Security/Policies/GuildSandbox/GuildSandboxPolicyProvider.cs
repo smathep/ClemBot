@@ -15,7 +15,7 @@ namespace ClemBot.Api.Core.Security.Policies.GuildSandbox
 
         public GuildSandboxPolicyProvider(IOptions<AuthorizationOptions> options)
         {
-            _backupPolicyProvider = new(options);
+            _backupPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
         }
 
         public async Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
