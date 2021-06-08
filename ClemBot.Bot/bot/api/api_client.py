@@ -16,6 +16,8 @@ log = logging.getLogger(__name__)
 
 RECONNECT_TIMEOUT = 10
 
+connect_lock = asyncio.Lock()
+
 
 class Result:
     def __init__(self, status: int, value: t.Any):
@@ -68,6 +70,60 @@ class ApiClient:
         log.info(f'Building URL: {url}')
         return url
 
+    async def close(self) -> None:
+        """Close the aiohttp session."""
+        await self.session.close()
+
+    async def connect(self):
+        if self.bot_only:
+            raise BotOnlyRequestError("Request Failed: Bot is in bot_only mode")
+
+        await self._internal_connect()
+
+    async def _reconnect(self):
+
+        # Asynchronously lock here to make sure
+        # that only one task is checking the connection status
+        # at a time
+        # otherwise we will have multiple tasks attempting to connect
+        async with connect_lock:
+            if not self.connected:
+                return
+
+            self.connected = False
+
+        # Invoke the disconnect callback here after we know that no other tasks are going
+        # to reach this point
+        await self.disconnect_callback()
+
+        log.info('Beginning ClemBot.Api reconnect request')
+        await self._internal_connect()
+
+    async def _internal_connect(self):
+        log.info(f'Connecting to ClemBot.Api at URL: {bot_secrets.secrets.api_url}')
+
+        # Check if we have an active session, this means we are trying to reconnect
+        # if we are do nothing
+        if not self.session:
+            self.session = aiohttp.ClientSession()
+
+        # Loop infinitely checking the api every RECONNECT_TIMEOUT seconds
+        # Once auth succeeds then we allow other requests
+        while not self.connected:
+            self.connected = await self._authorize()
+
+            if self.connected:
+                log.info('Connecting to ClemBot.Api succeeded')
+                await self.connect_callback()
+                break
+
+            log.error(f'Connecting to ClemBot.Api failed, retrying in {RECONNECT_TIMEOUT} seconds')
+            await asyncio.sleep(RECONNECT_TIMEOUT)
+
+    async def _disconnected(self):
+        log.warning('ClemBot.Api disconnected')
+        await self._reconnect()
+
     async def _get_auth_token(self) -> t.Optional[str]:
 
         auth_args = {
@@ -109,51 +165,6 @@ class ApiClient:
         log.info('Initialized JWT BEARER token Auth Headers')
         return True
 
-    async def connect(self):
-        if self.bot_only:
-            raise BotOnlyRequestError("Request Failed: Bot is in bot_only mode")
-
-        await self._internal_connect()
-
-    async def _internal_connect(self):
-        log.info(f'Connecting to ClemBot.Api at URL: {bot_secrets.secrets.api_url}')
-
-        # Check if we have an active session, this means we are trying to reconnect
-        # if we are do nothing
-        if not self.session:
-            self.session = aiohttp.ClientSession()
-
-        # Loop infinitely checking the api every RECONNECT_TIMEOUT seconds
-        # Once auth succeeds then we allow other requests
-        while not self.connected:
-            self.connected = await self._authorize()
-
-            if self.connected:
-                log.info('Connecting to ClemBot.Api succeeded')
-                await self.connect_callback()
-                break
-
-            log.error(f'Connecting to ClemBot.Api failed, retrying in {RECONNECT_TIMEOUT} seconds')
-            await asyncio.sleep(RECONNECT_TIMEOUT)
-
-    async def _reconnect(self):
-        if not self.connected:
-            return
-
-        self.connected = False
-
-        log.info('Beginning ClemBot.Api reconnect request')
-        await self._internal_connect()
-
-    async def _disconnected(self):
-        log.warning('ClemBot.Api disconnected')
-        await self.disconnect_callback()
-        await self._reconnect()
-
-    async def close(self) -> None:
-        """Close the aiohttp session."""
-        await self.session.close()
-
     async def _request(self, http_type: str, endpoint: str, raise_on_error, body=None):
 
         log.info(f'HTTP {http_type} Request initializing to route: {endpoint}')
@@ -185,6 +196,7 @@ class ApiClient:
         if self.bot_only:
             raise BotOnlyRequestError("Request Failed: Bot is in bot_only mode")
 
+        # Throw if we arent connected to notify commands or services the request failed
         if not self.connected:
             raise ApiClientRequestError('ClemBot.Api not connected')
 
@@ -202,7 +214,7 @@ class ApiClient:
             asyncio.create_task(self._disconnected())
             raise ConnectionError('Request to ClemBot.Api failed')
 
-        return resp
+        return resp.value
 
     async def get(self, endpoint: str, **kwargs):
         return await self._request_or_reconnect(HttpRequestType.get, endpoint, **kwargs)

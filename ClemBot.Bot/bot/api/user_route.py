@@ -55,7 +55,7 @@ class UserRoute(BaseRoute):
         if not users:
             return
 
-        return [u['id'] for u in users.value]
+        return [u['id'] for u in users]
 
     async def update_roles(self, user_id: int, roles: t.Iterable[int]):
         json = {

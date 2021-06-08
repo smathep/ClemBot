@@ -47,7 +47,7 @@ class ModerationRoute(BaseRoute):
         if not resp:
             return None
 
-        return resp.value['infractionId']
+        return resp['infractionId']
 
     async def insert_mute(self, *,
                           guild_id: int,
@@ -71,7 +71,7 @@ class ModerationRoute(BaseRoute):
         if not resp:
             return None
 
-        return resp.value['infractionId']
+        return resp['infractionId']
 
     async def insert_warn(self, *,
                           guild_id: int,
@@ -91,27 +91,16 @@ class ModerationRoute(BaseRoute):
         if not resp:
             return None
 
-        return resp.value['infractionId']
+        return resp['infractionId']
 
     async def delete_infraction(self, infraction_id: int, **kwargs) -> int:
-        resp = await self._client.delete(f'infractions/{infraction_id}', **kwargs)
-        return resp.value
+        return await self._client.delete(f'infractions/{infraction_id}', **kwargs)
 
     async def deactivate_mute(self, infraction_id: int, **kwargs) -> int:
-        resp = await self._client.patch(f'infractions/{infraction_id}/deactivate', **kwargs)
-
-        if not resp:
-            return None
-
-        return resp.value
+        return await self._client.patch(f'infractions/{infraction_id}/deactivate', **kwargs)
 
     async def get_infraction(self, infraction_id: int) -> t.Optional[Infraction]:
-        resp = await self._client.get(f'infractions/{infraction_id}')
-
-        if not resp:
-            return None
-
-        return resp.value
+        return await self._client.get(f'infractions/{infraction_id}')
 
     async def get_guild_infractions(self, guild_id: int) -> t.Optional[t.Iterator[Infraction]]:
         resp = await self._client.get(f'guilds/{guild_id}/infractions')
@@ -119,7 +108,7 @@ class ModerationRoute(BaseRoute):
         if not resp:
             return None
 
-        return [Infraction.from_dict(i) for i in resp.value]
+        return [Infraction.from_dict(i) for i in resp]
 
     async def get_guild_infractions_user(self, guild_id: int, user_id: int) -> t.Optional[t.Iterator[Infraction]]:
         resp = await self._client.get(f'users/infractions/{user_id}/{guild_id}')
@@ -127,7 +116,7 @@ class ModerationRoute(BaseRoute):
         if not resp:
             return None
 
-        return [Infraction.from_dict(i) for i in resp.value]
+        return [Infraction.from_dict(i) for i in resp]
 
     async def get_guild_warns_user(self, guild_id: int, user_id: int) -> t.Optional[t.Iterator[Infraction]]:
         resp = await self._client.get(f'users/infractions/{user_id}/{guild_id}/warn')
@@ -143,7 +132,7 @@ class ModerationRoute(BaseRoute):
         if not resp:
             return None
 
-        return [Infraction.from_dict(i) for i in resp.value]
+        return [Infraction.from_dict(i) for i in resp]
 
     async def get_guild_bans_user(self, guild_id: int, user_id: int) -> t.Optional[t.Iterator[Infraction]]:
         resp = await self._client.get(f'users/infractions/{user_id}/{guild_id}/ban')
@@ -151,4 +140,4 @@ class ModerationRoute(BaseRoute):
         if not resp:
             return None
 
-        return [Infraction.from_dict(i) for i in resp.value]
+        return [Infraction.from_dict(i) for i in resp]

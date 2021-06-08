@@ -49,12 +49,7 @@ class DesignatedChannelRoute(BaseRoute):
         if not resp:
             return
 
-        return {i['designation']: i['channelIds'] for i in resp.value}
+        return {i['designation']: i['channelIds'] for i in resp}
 
     async def get_global_designations(self, designation: str, ):
-        resp = await self._client.get(f'designatedchannels/{designation}/index')
-
-        if not resp:
-            return
-
-        return resp.value
+        return await self._client.get(f'designatedchannels/{designation}/index')

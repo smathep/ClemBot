@@ -50,7 +50,7 @@ class RoleRoute(BaseRoute):
         if not roles:
             return
 
-        return [r for r in roles.value if r['isAssignable']]
+        return [r for r in roles if r['isAssignable']]
 
     async def check_role_assignable(self, role_id: int):
         roles = await self._client.get(f'roles/{role_id}')
@@ -58,4 +58,4 @@ class RoleRoute(BaseRoute):
         if not roles:
             return
 
-        return roles.value['isAssignable']
+        return roles['isAssignable']

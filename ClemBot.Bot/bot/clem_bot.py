@@ -97,14 +97,14 @@ class ClemBot(commands.Bot):
         await self.send_startup_log_embed(embed)
 
     async def on_backend_connect(self):
-        embed = discord.Embed(title='Bot Connected to ClemBot.Api  :white_check_mark:', color=Colors.ClemsonOrange)
+        embed = discord.Embed(title='Bot Connected to ClemBot.Api  :rocket:', color=Colors.ClemsonOrange)
         embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M")
         embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
 
         await self.send_startup_log_embed(embed)
 
     async def on_backend_disconnect(self):
-        embed = discord.Embed(title='Bot Disconnected from ClemBot.Api  :no_entry_sign:', color=Colors.ClemsonOrange)
+        embed = discord.Embed(title='Bot Disconnected from ClemBot.Api  :warning:', color=Colors.ClemsonOrange)
         embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M")
         embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
 

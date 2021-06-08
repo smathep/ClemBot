@@ -27,15 +27,10 @@ class GuildRoute(BaseRoute):
         if not guilds:
             return
 
-        return [g['id'] for g in guilds.value]
+        return [g['id'] for g in guilds]
 
     async def get_guild(self, guild_id: int):
-        guild = await self._client.get(f'guilds/{guild_id}')
-
-        if not guild:
-            return
-
-        return guild.value
+        return await self._client.get(f'guilds/{guild_id}')
 
     async def get_guild_user_ids(self, guild_id: int):
         guild = await self._client.get(f'guilds/{guild_id}')
@@ -43,7 +38,7 @@ class GuildRoute(BaseRoute):
         if not guild:
             return
 
-        return guild.value['users']
+        return guild['users']
 
     async def edit_guild(self, guild_id: int, name: str):
         json = {

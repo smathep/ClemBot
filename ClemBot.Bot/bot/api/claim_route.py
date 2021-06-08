@@ -27,12 +27,7 @@ class ClaimRoute(BaseRoute):
         await self._client.delete('claimmappings', data=json, **kwargs)
 
     async def get_claims_role(self, role_id):
-        resp = await self._client.get(f'roles/{role_id}/claimmappings')
-
-        if not resp:
-            return None
-
-        return resp.value
+        return await self._client.get(f'roles/{role_id}/claimmappings')
 
     async def get_claims_user(self, user: discord.Member):
         claims = set()
@@ -42,7 +37,7 @@ class ClaimRoute(BaseRoute):
             if not resp:
                 continue
 
-            for claim in resp.value:
+            for claim in resp:
                 claims.add(claim)
 
         return claims
