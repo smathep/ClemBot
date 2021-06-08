@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import importlib
 import logging
@@ -17,7 +18,7 @@ import bot.services as services
 import bot.bot_secrets as bot_secrets
 from bot.api import *
 from bot.api.api_client import ApiClient
-from bot.consts import Colors, DesignatedChannels, OwnerDesignatedChannels
+from bot.consts import Colors
 from bot.errors import ClaimsAccessError, BotOnlyRequestError
 from bot.messaging.events import Events
 from bot.messaging.messenger import Messenger
@@ -38,7 +39,7 @@ class ClemBot(commands.Bot):
         # this super call is to pass the prefix up to the super class
         super().__init__(**kwargs)
 
-        self.api_client = ApiClient(reconnect_callback=self.on_backend_reconnect,
+        self.api_client = ApiClient(connect_callback=self.on_backend_connect,
                                     disconnect_callback=self.on_backend_disconnect,
                                     bot_only=bot_secrets.secrets.bot_only)
 
@@ -64,46 +65,63 @@ class ClemBot(commands.Bot):
 
         self.load_routes(self.api_client)
 
-    async def on_ready(self) -> None:
+        # Create a task to handle service and api startup
+        self.loop.create_task(self.bot_startup())
+
+    async def bot_startup(self):
         """
-        This is the entry point of the bot that is run when discord.py has finished its startup procedures.
+        This is the entry point of the bot that is run after discord.py has finished its startup procedures.
         This is where services are loaded and the startup procedures for each service is run
         """
 
-        # Connect to the api Before the services are loaded so they can begin their startup routines
-        try:
-            await self.api_client.connect()
-        except aiohttp.client_exceptions.ClientConnectorError as e:
-            log.fatal(f'Request to ClemBot.Api Failed: No server found')
-            await self.api_client.close()
-            await self.logout()
-            return
+        # Asynchronously wait until the api is ready for us
+        await self.wait_until_ready()
 
         await self.change_presence(activity=discord.Game(name='Run !help'))
 
-        await self.load_services()
+        # Connect to the api Before the services are loaded so they can begin their startup routines
+        # this will block until the api is connected to, only THEN will we run our service startups
+        # until this is connected no commands will be processed because there is no message_handling_service
+        # to process commands
+        if not bot_secrets.secrets.bot_only:
+            await self.api_client.connect()
 
+        await self.load_services()
+        log.info(f'Logged on as {self.user}')
+
+    async def on_ready(self) -> None:
         embed = discord.Embed(title='Bot Started Up  :white_check_mark:', color=Colors.ClemsonOrange)
-        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M")
         embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
 
         await self.send_startup_log_embed(embed)
 
-        log.info(f'Logged on as {self.user}')
-
-    async def on_backend_reconnect(self):
-        embed = discord.Embed(title='Bot Reconnected to ClemBot.Api  :white_check_mark:', color=Colors.ClemsonOrange)
-        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+    async def on_backend_connect(self):
+        embed = discord.Embed(title='Bot Connected to ClemBot.Api  :white_check_mark:', color=Colors.ClemsonOrange)
+        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M")
         embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
 
         await self.send_startup_log_embed(embed)
 
     async def on_backend_disconnect(self):
         embed = discord.Embed(title='Bot Disconnected from ClemBot.Api  :no_entry_sign:', color=Colors.ClemsonOrange)
-        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M")
         embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
 
         await self.send_startup_log_embed(embed)
+
+    async def close(self) -> None:
+        try:
+            log.info('Sending shutdown embed')
+            embed = discord.Embed(title='Bot Shutting down  :no_entry_sign:', color=Colors.ClemsonOrange)
+            embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M")
+            embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
+            await self.send_startup_log_embed(embed)
+        except Exception as e:
+            log.error(f'Logout error embed failed with error {e}')
+
+        log.info('Shutdown started: logging close time')
+        await super().close()
 
     async def send_startup_log_embed(self, embed):
         for channel_id in bot_secrets.secrets.startup_log_channel_ids:
@@ -148,19 +166,6 @@ class ClemBot(commands.Bot):
                                 f'\n **Help:** For more information on how claims work please see the wiki [Link!]('
                                 f'https://github.com/ClemsonCPSC-Discord/ClemBot/wiki/Authorization-Claims)\n'
                                 f'or run the `{await self.current_prefix(ctx.message)}help claims` command')
-
-    async def close(self) -> None:
-        try:
-            log.info('Sending shutdown embed')
-            embed = discord.Embed(title='Bot Shutting down  :white_check_mark:', color=Colors.ClemsonOrange)
-            embed.description = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-            embed.set_author(name=f'{self.user.name}', icon_url=self.user.avatar_url)
-            await self.send_startup_log_embed(embed)
-        except Exception as e:
-            log.error(f'Logout error embed failed with error {e}')
-
-        log.info('Shutdown started: logging close time')
-        await super().close()
 
     async def on_message(self, message) -> None:
         """
@@ -285,7 +290,7 @@ class ClemBot(commands.Bot):
         # Handle if the error is a bot only request error, this is only thrown when a request is attempted
         # In BotOnly mode so we can safely log that it happened and then ignore it
         if isinstance(e, BotOnlyRequestError):
-            log.info(f'Ignoring BotOnly mode error')
+            log.info(f'Ignoring ClemBot.Api request error in bot_only mode')
             return
 
         # log the exception first thing so we can be sure we got it
@@ -303,7 +308,9 @@ class ClemBot(commands.Bot):
                 field_name = 'Traceback' if i == 0 else 'Continued'
                 embed.add_field(name=field_name, value=f'```{field}```', inline=False)
 
-            await self.messenger.publish(Events.on_broadcast_designated_channel, OwnerDesignatedChannels.error_log, embed)
+            for channel_id in bot_secrets.secrets.error_log_channel_ids:
+                channel = await self.fetch_channel(channel_id)
+                await channel.send(embed=embed)
 
     def get_full_name(self, author) -> str:
         return f'{author.name}#{author.discriminator}'

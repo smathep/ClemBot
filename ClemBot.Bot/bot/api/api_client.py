@@ -1,6 +1,9 @@
+import asyncio
 import json
 import logging
+import queue
 import typing as t
+from http import HTTPStatus
 from urllib.parse import quote
 
 import aiohttp
@@ -10,6 +13,8 @@ from bot.consts import Urls
 from bot.errors import ApiClientRequestError, BotOnlyRequestError
 
 log = logging.getLogger(__name__)
+
+RECONNECT_TIMEOUT = 10
 
 
 class Result:
@@ -32,13 +37,18 @@ class HttpRequestType:
 class ApiClient:
 
     def __init__(self, *,
-                 reconnect_callback=None,
+                 connect_callback=None,
                  disconnect_callback=None,
                  bot_only: bool = False):
 
-        self.auth_token: str = None
-        self.session: aiohttp.ClientSession = None
+        self.auth_token: str
+        self.session: t.Optional[aiohttp.ClientSession] = None
         self.connected: bool = False
+        self.headers: t.Dict[str, str] = None
+
+        self._is_reconnecting: bool = False
+
+        self.request_queue: queue.Queue = None
 
         self.bot_only = bot_only
 
@@ -46,137 +56,151 @@ class ApiClient:
         async def async_stub():
             pass
 
-        self.reconnect_callback = reconnect_callback or async_stub
+        # Specify a callback to alert the creation context of connection events
+        self.connect_callback = connect_callback or async_stub
+
+        # Specify a callback to alert the creation context of disconnection events
         self.disconnect_callback = disconnect_callback or async_stub
 
     @staticmethod
-    def _url_for(url: str):
+    def _build_url(url: str):
         url = f'{bot_secrets.secrets.api_url}{Urls.base_api_url}{quote(url)}'
         log.info(f'Building URL: {url}')
         return url
 
-    async def _get_auth_token(self):
-        async with self.session.request(HttpRequestType.get,
-                                        self._url_for('authorize'),
-                                        ssl=False,
-                                        params={'key': bot_secrets.secrets.api_key}
-                                        ) as resp:
-            if resp.status != 200:
-                self.connected = False
-                log.error(f'Connecting to ClemBot.Api at Url: {bot_secrets.secrets.api_url} '
-                          f'failed with response code: {resp.status}')
-                return
+    async def _get_auth_token(self) -> t.Optional[str]:
 
-            self.connected = True
-            resp_json = await resp.json()
-            return resp_json['token']
+        auth_args = {
+            'method': HttpRequestType.get,
+            'ssl': False,
+            'url': self._build_url('authorize'),
+            'headers': {'Accept': '*/*'},
+            'params': {'key': bot_secrets.secrets.api_key}
+        }
 
-    async def _authorize(self):
+        try:
+            async with self.session.request(**auth_args) as resp:
 
-        if self.bot_only:
-            log.info('Bot in bot_only mode, skipping Api authorization')
+                if resp.status == HTTPStatus.OK:
+                    log.info('JWT Bearer token received')
+                    return (await resp.json())['token']
+
+                if resp.status == HTTPStatus.FORBIDDEN:
+                    log.error('JWT Auth denied, Invalid API key')
+
+        except aiohttp.ClientConnectorError:
+            log.error('Error: ClemBot.Api not found')
             return
 
-        headers = {
-            'Accept': '*/*'
-        }
+    async def _authorize(self) -> bool:
         log.info('Requesting ClemBot.Api Access token')
-
-        # Check if we have an active session, this means we are trying to reconnect
-        # if we are close the session and create a new one
-        if self.session:
-            await self.session.close()
-        self.session = aiohttp.ClientSession(headers=headers)
 
         self.auth_token = await self._get_auth_token()
 
-        if not self.connected:
-            raise ConnectionError('Connecting to ClemBot.Api Failed')
+        if not self.auth_token:
+            return False
 
-        log.info('Connecting to ClemBot.Api Successful')
-
-        await self.session.close()
-
-        headers = {
+        self.headers = {
             'Authorization': f'BEARER {self.auth_token}',
             'Content-type': 'application/json',
             'Accept': 'application/json'
         }
-        log.info('Initialized JWT BEARER token Auth Headers')
 
-        self.session = aiohttp.ClientSession(headers=headers)
+        log.info('Initialized JWT BEARER token Auth Headers')
+        return True
 
     async def connect(self):
+        if self.bot_only:
+            raise BotOnlyRequestError("Request Failed: Bot is in bot_only mode")
+
+        await self._internal_connect()
+
+    async def _internal_connect(self):
         log.info(f'Connecting to ClemBot.Api at URL: {bot_secrets.secrets.api_url}')
-        await self._authorize()
+
+        # Check if we have an active session, this means we are trying to reconnect
+        # if we are do nothing
+        if not self.session:
+            self.session = aiohttp.ClientSession()
+
+        # Loop infinitely checking the api every RECONNECT_TIMEOUT seconds
+        # Once auth succeeds then we allow other requests
+        while not self.connected:
+            self.connected = await self._authorize()
+
+            if self.connected:
+                log.info('Connecting to ClemBot.Api succeeded')
+                await self.connect_callback()
+                break
+
+            log.error(f'Connecting to ClemBot.Api failed, retrying in {RECONNECT_TIMEOUT} seconds')
+            await asyncio.sleep(RECONNECT_TIMEOUT)
 
     async def _reconnect(self):
-        log.info(f'Attempting to reconnect to ClemBot.Api at URL: {bot_secrets.secrets.api_url}')
-        await self._authorize()
+        if not self.connected:
+            return
 
-        if self.connected:
-            log.info('Successfully reconnected to ClemBot.Api')
-            await self.reconnect_callback()
+        self.connected = False
+
+        log.info('Beginning ClemBot.Api reconnect request')
+        await self._internal_connect()
+
+    async def _disconnected(self):
+        log.warning('ClemBot.Api disconnected')
+        await self.disconnect_callback()
+        await self._reconnect()
 
     async def close(self) -> None:
         """Close the aiohttp session."""
         await self.session.close()
 
-    async def _request(self, http_type: str, endpoint, **kwargs):
+    async def _request(self, http_type: str, endpoint: str, raise_on_error, body=None):
+
+        log.info(f'HTTP {http_type} Request initializing to route: {endpoint}')
+
+        req_args = {
+            'method': http_type,
+            'ssl': False,
+            'url': self._build_url(endpoint),
+            'raise_for_status': raise_on_error,
+            'headers': self.headers,
+        }
+
+        if body:
+            req_args['json'] = body
+
+        async with self.session.request(**req_args) as resp:
+            if resp.ok:
+                return Result(resp.status, await resp.json())
+
+            log.error(f'Request at endpoint "{endpoint}" returned error code {resp.status}')
+
+            return Result(resp.status, None)
+
+    async def _request_or_reconnect(self, http_type: str, endpoint: str, **kwargs):
+
+        raise_on_error = kwargs.get('raise_on_error', False),
+        body = kwargs.get('data', None)
 
         if self.bot_only:
             raise BotOnlyRequestError("Request Failed: Bot is in bot_only mode")
 
-        log.info(f'HTTP {http_type} Request initializing to route: {endpoint}')
-        if 'data' in kwargs:
-            data = json.dumps(kwargs['data'], indent=2)
-            log.info(f'HTTP {http_type} data found {data}')
-            kwargs['data'] = data
-
-        async with self.session.request(http_type,
-                                        self._url_for(endpoint),
-                                        ssl=False,
-                                        **kwargs
-                                        ) as resp:
-
-            if resp.status != 200:
-                log.warning(f'HTTP Request at endpoint {endpoint} returned {resp.status} status')
-                return Result(resp.status, None)
-
-            res = Result(resp.status, await resp.json())
-
-        log.info(f'Result for HTTP {http_type} at endpoint: {endpoint}\n{res}')
-        return res
-
-    async def _request_or_reconnect(self, http_type: str, endpoint, **kwargs):
-
-        raise_on_error = kwargs.pop('raise_on_error', False)
+        if not self.connected:
+            raise ApiClientRequestError('ClemBot.Api not connected')
 
         try:
-            resp = await self._request(http_type, endpoint, **kwargs)
-        except aiohttp.client_exceptions.ClientConnectorError as e:
-            log.error(f'Request to ClemBot.Api Failed: No server found')
-            if self.connected:
-                await self.disconnect_callback()
-            self.connected = False
-            raise e
+            resp = await self._request(http_type,
+                                       endpoint,
+                                       raise_on_error=raise_on_error,
+                                       body=body)
 
-        if resp.status == 200:
-            return resp
+        except aiohttp.ClientConnectorError:
+            asyncio.create_task(self._disconnected())
+            raise ConnectionError('Request to ClemBot.Api failed')
 
-        if resp.status == 401:
-            self.connected = False
-            log.warning(f'Request at endpoint: {endpoint} Failed with status code {resp.status}. Attempting to Reconnect to API...')
-            await self._reconnect()
-
-            if not self.connected:
-                raise ConnectionError('Reconnecting to ClemBot.Api Failed')
-
-            log.info(f'Retrying failed request at endpoint: {endpoint}')
-            return await self._request(http_type, endpoint, **kwargs)
-
-        if raise_on_error:
-            raise ApiClientRequestError(f'Request at endpoint: {endpoint} Failed with status code {resp.status}')
+        if resp.status == HTTPStatus.FORBIDDEN:
+            asyncio.create_task(self._disconnected())
+            raise ConnectionError('Request to ClemBot.Api failed')
 
         return resp
 

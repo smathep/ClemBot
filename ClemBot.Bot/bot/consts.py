@@ -31,7 +31,6 @@ class DesignatedChannels(DesignatedChannelBase):
 
 class OwnerDesignatedChannels(DesignatedChannelBase):
     server_join_log = auto()
-    error_log = auto()
     bot_dm_log = auto()
 
     @staticmethod

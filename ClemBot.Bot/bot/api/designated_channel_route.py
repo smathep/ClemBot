@@ -38,7 +38,7 @@ class DesignatedChannelRoute(BaseRoute):
         }
         resp = await self._client.get('designatedchannels/details', data=json)
 
-        if resp.status != 200:
+        if not resp.status:
             return
 
         return resp.value['mappings']
@@ -46,7 +46,7 @@ class DesignatedChannelRoute(BaseRoute):
     async def get_guild_all_designated_channels(self, guild_id: int, ):
         resp = await self._client.get(f'guilds/{guild_id}/designatedchannels')
 
-        if resp.status != 200:
+        if not resp:
             return
 
         return {i['designation']: i['channelIds'] for i in resp.value}
@@ -54,7 +54,7 @@ class DesignatedChannelRoute(BaseRoute):
     async def get_global_designations(self, designation: str, ):
         resp = await self._client.get(f'designatedchannels/{designation}/index')
 
-        if resp.status != 200:
+        if not resp:
             return
 
         return resp.value

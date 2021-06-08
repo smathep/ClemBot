@@ -22,7 +22,13 @@ class CustomPrefix:
         # Check if bot is in BotOnly mode, if it is we cant get custom prefixes
         # so we have to fall back to self.default
         if not bot_secrets.secrets.bot_only:
-            prefixes = await bot.custom_prefix_route.get_custom_prefixes(message.guild.id)
+            # noinspection PyBroadException
+            try:
+                # Try to grab the prefixes from the db, raise an error on failure
+                # so we know to fallback to the default prefix
+                prefixes = await bot.custom_prefix_route.get_custom_prefixes(message.guild.id, raise_on_error=True)
+            except Exception:
+                pass
 
         if len(prefixes) == 0:
             prefixes = [self.default]

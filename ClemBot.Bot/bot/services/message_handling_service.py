@@ -27,9 +27,6 @@ class MessageHandlingService(BaseService):
         # Primary entry point for handling commands
         await self.bot.process_commands(message)
 
-        if bot_secrets.secrets.bot_only:
-            return
-
         await self.bot.message_route.create_message(message.id,
                                                     message.content,
                                                     message.guild.id,

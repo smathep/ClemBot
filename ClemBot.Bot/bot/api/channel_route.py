@@ -18,12 +18,7 @@ class ChannelRoute(BaseRoute):
         await self._client.post('channels', data=json, **kwargs)
 
     async def get_channel(self, channel_id: int):
-        user = await self._client.get(f'channels/{channel_id}')
-
-        if user.status != 200:
-            return
-
-        return user.value
+        return await self._client.get(f'channels/{channel_id}')
 
     async def edit_channel(self, channel_id: int, name: str, **kwargs):
         json = {
@@ -37,9 +32,4 @@ class ChannelRoute(BaseRoute):
         return await self._client.delete(f'channels/{channel_id}', **kwargs)
 
     async def get_guilds_channels(self, guild_id: int) -> t.Optional[t.List[int]]:
-        users = await self._client.get(f'guilds/{guild_id}/channels')
-
-        if users.status != 200:
-            return
-
-        return users.value
+        return await self._client.get(f'guilds/{guild_id}/channels')

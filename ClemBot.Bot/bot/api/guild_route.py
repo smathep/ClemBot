@@ -24,7 +24,7 @@ class GuildRoute(BaseRoute):
     async def get_all_guilds_ids(self):
         guilds = await self._client.get('guilds')
 
-        if guilds.status != 200:
+        if not guilds:
             return
 
         return [g['id'] for g in guilds.value]
@@ -32,7 +32,7 @@ class GuildRoute(BaseRoute):
     async def get_guild(self, guild_id: int):
         guild = await self._client.get(f'guilds/{guild_id}')
 
-        if guild.status != 200:
+        if not guild:
             return
 
         return guild.value
@@ -40,7 +40,7 @@ class GuildRoute(BaseRoute):
     async def get_guild_user_ids(self, guild_id: int):
         guild = await self._client.get(f'guilds/{guild_id}')
 
-        if guild.status != 200:
+        if not guild:
             return
 
         return guild.value['users']

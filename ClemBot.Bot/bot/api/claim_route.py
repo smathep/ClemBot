@@ -29,7 +29,7 @@ class ClaimRoute(BaseRoute):
     async def get_claims_role(self, role_id):
         resp = await self._client.get(f'roles/{role_id}/claimmappings')
 
-        if resp.status != 200:
+        if not resp:
             return None
 
         return resp.value
@@ -39,8 +39,8 @@ class ClaimRoute(BaseRoute):
         for role in user.roles:
             resp = await self._client.get(f'roles/{role.id}/claimmappings')
 
-            if resp.status != 200:
-                return None
+            if not resp:
+                continue
 
             for claim in resp.value:
                 claims.add(claim)

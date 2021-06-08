@@ -19,12 +19,7 @@ class RoleRoute(BaseRoute):
         await self._client.post('roles', data=json, **kwargs)
 
     async def get_role(self, role_id: int):
-        user = await self._client.get(f'roles/{role_id}')
-
-        if user.status != 200:
-            return
-
-        return user.value
+        return await self._client.get(f'roles/{role_id}')
 
     async def edit_role(self, role_id: int, name: str, is_admin: bool, **kwargs):
         json = {
@@ -47,25 +42,20 @@ class RoleRoute(BaseRoute):
         await self._client.delete(f'roles/{role_id}', **kwargs)
 
     async def get_guilds_roles(self, guild_id: int) -> t.Optional[t.List[int]]:
-        roles = await self._client.get(f'guilds/{guild_id}/roles')
-
-        if roles.status != 200:
-            return
-
-        return roles.value
+        return await self._client.get(f'guilds/{guild_id}/roles')
 
     async def get_guilds_assignable_roles(self, guild_id: int) -> t.Optional[t.List]:
         roles = await self._client.get(f'guilds/{guild_id}/roles')
 
-        if roles.status != 200:
+        if not roles:
             return
 
         return [r for r in roles.value if r['isAssignable']]
 
     async def check_role_assignable(self, role_id: int):
-        user = await self._client.get(f'roles/{role_id}')
+        roles = await self._client.get(f'roles/{role_id}')
 
-        if user.status != 200:
+        if not roles:
             return
 
-        return user.value['isAssignable']
+        return roles.value['isAssignable']

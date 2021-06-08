@@ -58,9 +58,4 @@ class TagRoute(BaseRoute):
         await self._client.post('tags/invoke', data=json)
 
     async def get_guilds_tags(self, guild_id: int) -> t.Optional[t.List[int]]:
-        users = await self._client.get(f'guilds/{guild_id}/tags')
-
-        if users.status != 200:
-            return
-
-        return users.value
+        return await self._client.get(f'guilds/{guild_id}/tags')

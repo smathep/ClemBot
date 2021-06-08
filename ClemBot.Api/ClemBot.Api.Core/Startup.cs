@@ -110,8 +110,11 @@ namespace ClemBot.Api.Core
             }
             );
 
-            services.AddAuthorization();
-
+            services.AddAuthorization(options => {
+                options.AddPolicy(Policies.BotMaster, policy => {
+                    policy.RequireClaim(Claims.BotApiKey);
+                });
+            });
             // Add authorization policy providers
             services.AddScoped<IAuthorizationHandler, BotMasterAuthHandler>();
             services.AddScoped<IAuthorizationHandler, GuildSandboxAuthHandler>();
