@@ -24,7 +24,7 @@ class CalculatorCog(commands.Cog):
 
     @ext.command()
     @ext.long_help(
-        'Native calculator in discord to evaluate any arbitrary mathematical epxressions'
+        'Native calculator in discord to evaluate any arbitrary mathematical expressions'
     )
     @ext.short_help('Does your math for you')
     @ext.example(('calc 1+1', 'calc 10/20'))

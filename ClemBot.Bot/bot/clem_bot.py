@@ -35,10 +35,12 @@ class ClemBot(commands.Bot):
     as well as the dynamic loading of services and cogs
     """
 
+    # noinspection PyTypeChecker
     def __init__(self, messenger, scheduler, **kwargs):
         # this super call is to pass the prefix up to the super class
         super().__init__(**kwargs)
 
+        # Initialize the ApiClient with callbacks and mode settings
         self.api_client = ApiClient(connect_callback=self.on_backend_connect,
                                     disconnect_callback=self.on_backend_disconnect,
                                     bot_only=bot_secrets.secrets.bot_only)
@@ -63,6 +65,8 @@ class ClemBot(commands.Bot):
         self.load_cogs()
         self.active_services = {}
 
+        # Load the route objects into the attributes so the
+        # startup service has active routes
         self.load_routes(self.api_client)
 
         # Create a task to handle service and api startup
@@ -140,7 +144,7 @@ class ClemBot(commands.Bot):
             return
 
         if not isinstance(command, ext.ExtBase):
-            # If the command isnt an extension command let it through, we dont need to think about it
+            # If the command isn't an extension command let it through, we dont need to think about it
             return
 
         if author.guild_permissions.administrator:
@@ -155,6 +159,7 @@ class ClemBot(commands.Bot):
             # The command is going to check the claims in the command body, nothing else to do
             return
 
+        # Hit the db to get a users current claims
         claims = await self.claim_route.get_claims_user(author)
 
         if claims and command.claims_check(claims):
@@ -257,12 +262,12 @@ class ClemBot(commands.Bot):
 
     async def on_command_error(self, ctx, error):
         """
-        Handler for cog level errors, if a command throws and isnt handled
+        Handler for cog level errors, if a command throws and isn't handled
         the exception will end up here
 
         Args:
             ctx ([type]): The context that the command that errored was sent from
-            e ([type]): The unhandled exception
+            error ([type]): The unhandled exception
         """
         if ctx.cog:
             if commands.Cog._get_overridden_method(ctx.cog.cog_command_error) is not None:

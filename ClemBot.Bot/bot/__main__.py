@@ -78,8 +78,6 @@ def main():
     # Create the scheduler for injection into the bot instance
     scheduler = Scheduler()
 
-    # Create the api client for injection into the bot
-    client = ApiClient()
     # set allowed mentions
     mentions = discord.AllowedMentions(everyone=False, roles=False)
 

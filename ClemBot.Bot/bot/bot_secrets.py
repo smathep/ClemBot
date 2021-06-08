@@ -116,7 +116,7 @@ class BotSecrets:
     @property
     def gif_me_token(self) -> str:
         if not self._gifMe_token:
-            raise ConfigAccessError(f'gif_me has not been intialized')
+            raise ConfigAccessError(f'gif_me has not been initialized')
         return self._gifMe_token
 
     @gif_me_token.setter
