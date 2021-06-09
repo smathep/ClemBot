@@ -1,15 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using ClemBot.Api.Core.Features.Users;
-using ClemBot.Api.Core.Features.Users.Bot;
-using ClemBot.Api.Core.Security;
-using ClemBot.Api.Core.Security.Policies;
 using ClemBot.Api.Core.Security.Policies.BotMaster;
 using ClemBot.Api.Core.Utilities;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClemBot.Api.Core.Features.Users
@@ -86,7 +80,7 @@ namespace ClemBot.Api.Core.Features.Users
 
         [HttpPost("bot/[controller]/{Id}/updateroles")]
         [BotMasterAuthorize]
-        public async Task<IActionResult> UpdateRoles(ulong Id, UpdateRoles.Command command) =>
+        public async Task<IActionResult> UpdateRoles(ulong Id, Bot.UpdateRoles.Command command) =>
             await _mediator.Send(command with { Id = Id }) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),

@@ -121,9 +121,9 @@ class MuteCog(commands.Cog):
 
     @ext.command()
     @ext.long_help(
-        'UnMutes a user for a with an optional reason'
+        'Unmutes a user for a with an optional reason'
     )
-    @ext.short_help('UnMutes a user')
+    @ext.short_help('Unmutes a user')
     @ext.example('Unmute @SomeUser Timeout')
     @ext.required_claims(Claims.moderation_mute)
     async def unmute(self, ctx: commands.Context, subject: discord.Member, *, reason: t.Optional[str]):

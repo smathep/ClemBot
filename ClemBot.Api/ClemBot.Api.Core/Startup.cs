@@ -107,8 +107,7 @@ namespace ClemBot.Api.Core
                     ValidAudience = jwtTokenConfig.Audience,
                     ValidateAudience = true
                 };
-            }
-            );
+            });
 
             services.AddAuthorization(options => {
                 options.AddPolicy(Policies.BotMaster, policy => {

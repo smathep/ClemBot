@@ -11,9 +11,9 @@ class ChannelRoute(BaseRoute):
 
     async def create_channel(self, channel_id: int, name: int, guild_id: int, **kwargs):
         json = {
-            'id': channel_id,
-            'name': name,
-            'guildId': guild_id
+            'Id': channel_id,
+            'Name': name,
+            'GuildId': guild_id
         }
         await self._client.post('channels', data=json, **kwargs)
 
@@ -22,8 +22,8 @@ class ChannelRoute(BaseRoute):
 
     async def edit_channel(self, channel_id: int, name: str, **kwargs):
         json = {
-            'id': channel_id,
-            'name': name,
+            'Id': channel_id,
+            'Name': name,
         }
 
         return await self._client.patch('channels', data=json, **kwargs)

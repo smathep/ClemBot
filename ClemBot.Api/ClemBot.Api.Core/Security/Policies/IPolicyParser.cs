@@ -14,7 +14,7 @@ namespace ClemBot.Api.Core.Security.Policies
         /// Defines a method to Deserialize out a given policies value
         /// that is provided to the PolicyProvider
         /// </summary>
-        /// <param name="val"></param>
+        /// <param name="val">String to deserialize into a T</param>
         /// <returns>Deserialized Policy Values</returns>
         public T? Deserialize(string val);
     }

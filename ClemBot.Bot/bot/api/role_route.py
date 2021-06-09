@@ -11,10 +11,10 @@ class RoleRoute(BaseRoute):
 
     async def create_role(self, role_id: int, name: int, is_admin: bool, guild_id: int, **kwargs):
         json = {
-            'id': role_id,
-            'name': name,
-            'admin': is_admin,
-            'guildId': guild_id
+            'Id': role_id,
+            'Name': name,
+            'Admin': is_admin,
+            'GuildId': guild_id
         }
         await self._client.post('roles', data=json, **kwargs)
 
