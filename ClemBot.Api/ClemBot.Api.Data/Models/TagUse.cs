@@ -11,7 +11,7 @@ namespace ClemBot.Api.Data.Models
         public ulong UserId { get; set; }
         public User User { get; set; }
 
-        public ulong TagId { get; set; }
+        public int TagId { get; set; }
         public Tag Tag { get; set; }
 
         public ulong ChannelId { get; set; }

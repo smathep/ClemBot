@@ -75,7 +75,6 @@ class DesignatedChannelsCog(commands.Cog):
             await ctx.send(f'The requested designated channel `{channel_type}` does not exist')
             return
 
-        #if channel.id in await channel_repo.get_guild_designated_channels(channel_type, ctx.guild.id):
         if channel.id in await self.bot.designated_channel_route.get_guild_designated_channel_ids(ctx.guild.id, channel_type):
             await ctx.send(f'{channel.mention} already registered to `{channel_type}`')
             return

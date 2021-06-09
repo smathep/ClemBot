@@ -169,7 +169,7 @@ namespace ClemBot.Api.Core.Features.Guilds
 
         [HttpGet("bot/[controller]/{Id}/Infractions")]
         [BotMasterAuthorize]
-        public async Task<IActionResult> Index([FromRoute] Bot.Infractions.Query command) =>
+        public async Task<IActionResult> Infractions([FromRoute] Bot.Infractions.Query command) =>
             await _mediator.Send(command) switch
             {
                 { Status: QueryStatus.Success } result => Ok(result.Value),

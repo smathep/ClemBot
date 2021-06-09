@@ -87,6 +87,13 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                         Admin = role.Admin,
                         IsAssignable = false
                     };
+
+                    var members = await _context.Users
+                        .Where(x => role.Members.Contains(x.Id))
+                        .ToListAsync();
+
+                    roleEntity.Users = members;
+
                     _context.Roles.Add(roleEntity);
                     guild.Roles?.Add(roleEntity);
                 }
@@ -101,6 +108,11 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
                     var members = await _context.Users
                         .Where(x => roleDto.Members.Contains(x.Id))
                         .ToListAsync();
+
+                    if (role is null)
+                    {
+                        continue;
+                    }
 
                     role.Users.Clear();
                     role.Users = members;

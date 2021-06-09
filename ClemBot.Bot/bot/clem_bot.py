@@ -65,10 +65,6 @@ class ClemBot(commands.Bot):
         self.load_cogs()
         self.active_services = {}
 
-        # Load the route objects into the attributes so the
-        # startup service has active routes
-        self.load_routes(self.api_client)
-
         # Create a task to handle service and api startup
         self.loop.create_task(self.bot_startup())
 
@@ -80,6 +76,10 @@ class ClemBot(commands.Bot):
 
         # Asynchronously wait until the api is ready for us
         await self.wait_until_ready()
+
+        # Load the route objects into the attributes so the
+        # startup service has active routes
+        self.load_routes(self.api_client)
 
         await self.change_presence(activity=discord.Game(name='Run !help'))
 

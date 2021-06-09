@@ -1,4 +1,5 @@
 import typing as t
+import discord
 
 from bot.api.api_client import ApiClient
 from bot.api.base_route import BaseRoute
@@ -11,10 +12,23 @@ class UserRoute(BaseRoute):
 
     async def create_user(self, user_id: int, name: str, **kwargs):
         json = {
-            'id': user_id,
-            'name': name,
+            'Id': user_id,
+            'Name': name,
         }
         await self._client.post('users', data=json, **kwargs)
+
+    async def create_user_bulk(self, users: t.Iterable[discord.User], **kwargs):
+        users = [{
+            'Id': u.id,
+            'Name': u.name,
+        }
+            for u in users]
+
+        json = {
+            'Users': users
+        }
+
+        await self._client.post('users/createbulk', data=json, **kwargs)
 
     async def get_user(self, user_id: int):
         return await self._client.get(f'users/{user_id}')
@@ -43,8 +57,8 @@ class UserRoute(BaseRoute):
 
     async def edit_user(self, user_id: int, name: str):
         json = {
-            'id': user_id,
-            'name': name,
+            'Id': user_id,
+            'Name': name,
         }
 
         await self._client.patch('users/edit', data=json)
@@ -53,7 +67,7 @@ class UserRoute(BaseRoute):
         users = await self._client.get(f'users')
 
         if not users:
-            return
+            return []
 
         return [u['id'] for u in users]
 

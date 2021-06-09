@@ -139,7 +139,7 @@ class TagCog(commands.Cog):
     @ext.example('tag delete mytagname')
     async def delete(self, ctx: commands.Context, name):
 
-        name=name.lower()
+        name = name.lower()
 
         tag = await self.bot.tag_route.get_tag(ctx.guild.id, name)
 

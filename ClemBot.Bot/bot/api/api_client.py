@@ -105,7 +105,7 @@ class ApiClient:
         # Check if we have an active session, this means we are trying to reconnect
         # if we are do nothing
         if not self.session:
-            self.session = aiohttp.ClientSession()
+            self.session = aiohttp.ClientSession(raise_for_status=False)
 
         # Loop infinitely checking the api every RECONNECT_TIMEOUT seconds
         # Once auth succeeds then we allow other requests
@@ -181,10 +181,10 @@ class ApiClient:
             req_args['json'] = body
 
         async with self.session.request(**req_args) as resp:
-            if resp.ok:
+            if resp.status == 200:
                 return Result(resp.status, await resp.json())
 
-            log.error(f'Request at endpoint "{endpoint}" returned error code {resp.status}')
+            log.error(f'Request at endpoint "{endpoint}" returned non 200 error code {resp.status}')
 
             return Result(resp.status, None)
 

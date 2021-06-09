@@ -27,12 +27,8 @@ class StartupService(BaseService):
     async def load_users(self):
         db_users = await self.bot.user_route.get_users_ids()
         new_users = [u for u in self.bot.users if u.id not in db_users]
-        tasks = []
-        for user in new_users:
-            log.info(f'Creating new User {StartupService.get_full_name(user)}: {user.id}')
-            tasks.append(asyncio.create_task(self.bot.user_route.create_user(user.id, user.name)))
 
-        await asyncio.gather(*tasks)
+        await self.bot.user_route.create_user_bulk(new_users)
 
     async def load_users_guilds(self):
         tasks = []

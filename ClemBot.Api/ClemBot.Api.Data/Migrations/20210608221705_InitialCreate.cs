@@ -11,7 +11,7 @@ namespace ClemBot.Api.Data.Migrations
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:bot_auth_claims", "designated_channel_view,designated_channel_modify,custom_prefix_set,welcome_message_view,welcome_message_modify,tag_add,tag_delete,assignable_roles_add,assignable_roles_delete,delete_message,emote_add,claims_view,claims_modify,manage_class_add,moderation_warn,moderation_ban,moderation_mute,moderation_purge,moderation_infraction_view")
-                .Annotation("Npgsql:Enum:designated_channels", "message_log,moderation_log,startup_log,user_join_log,user_leave_log,starboard,server_join_log,error_log,bot_dm_log")
+                .Annotation("Npgsql:Enum:designated_channels", "message_log,moderation_log,user_join_log,user_leave_log,starboard,server_join_log,bot_dm_log")
                 .Annotation("Npgsql:Enum:infraction_type", "ban,mute,warn");
 
             migrationBuilder.CreateTable(
@@ -85,6 +85,7 @@ namespace ClemBot.Api.Data.Migrations
                     Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     IsAssignable = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
+                    Admin = table.Column<bool>(type: "boolean", nullable: false),
                     GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
@@ -290,6 +291,30 @@ namespace ClemBot.Api.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RoleUser",
+                columns: table => new
+                {
+                    RolesId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    UsersId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoleUser", x => new { x.RolesId, x.UsersId });
+                    table.ForeignKey(
+                        name: "FK_RoleUser_Roles_RolesId",
+                        column: x => x.RolesId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoleUser_Users_UsersId",
+                        column: x => x.UsersId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TagUses",
                 columns: table => new
                 {
@@ -297,8 +322,7 @@ namespace ClemBot.Api.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     UserId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    TagId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    TagId1 = table.Column<int>(type: "integer", nullable: true),
+                    TagId = table.Column<int>(type: "integer", nullable: false),
                     ChannelId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
@@ -311,11 +335,11 @@ namespace ClemBot.Api.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TagUses_Tags_TagId1",
-                        column: x => x.TagId1,
+                        name: "FK_TagUses_Tags_TagId",
+                        column: x => x.TagId,
                         principalTable: "Tags",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TagUses_Users_UserId",
                         column: x => x.UserId,
@@ -421,6 +445,11 @@ namespace ClemBot.Api.Data.Migrations
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RoleUser_UsersId",
+                table: "RoleUser",
+                column: "UsersId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tags_GuildId",
                 table: "Tags",
                 column: "GuildId");
@@ -436,9 +465,9 @@ namespace ClemBot.Api.Data.Migrations
                 column: "ChannelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TagUses_TagId1",
+                name: "IX_TagUses_TagId",
                 table: "TagUses",
-                column: "TagId1");
+                column: "TagId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TagUses_UserId",
@@ -470,13 +499,16 @@ namespace ClemBot.Api.Data.Migrations
                 name: "Reminders");
 
             migrationBuilder.DropTable(
+                name: "RoleUser");
+
+            migrationBuilder.DropTable(
                 name: "TagUses");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Messages");
 
             migrationBuilder.DropTable(
-                name: "Messages");
+                name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Tags");

@@ -54,6 +54,16 @@ namespace ClemBot.Api.Core.Features.Users
                 _ => throw new InvalidOperationException()
             };
 
+        [HttpPost("bot/[controller]/CreateBulk")]
+        [BotMasterAuthorize]
+        public async Task<IActionResult> Create(Bot.CreateBulk.Command command) =>
+            await _mediator.Send(command) switch
+            {
+                { Status: QueryStatus.Success } result => Ok(result.Value),
+                { Status: QueryStatus.Conflict } => Conflict(),
+                _ => throw new InvalidOperationException()
+            };
+
         [HttpPatch("bot/[controller]")]
         [BotMasterAuthorize]
         public async Task<IActionResult> Edit(Bot.Edit.Command command) =>

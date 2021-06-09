@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ClemBot.Api.Data.Migrations
 {
     [DbContext(typeof(ClemBotContext))]
-    [Migration("20210601030931_InitialCreate")]
+    [Migration("20210608221705_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,7 +19,7 @@ namespace ClemBot.Api.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasPostgresEnum(null, "bot_auth_claims", new[] { "designated_channel_view", "designated_channel_modify", "custom_prefix_set", "welcome_message_view", "welcome_message_modify", "tag_add", "tag_delete", "assignable_roles_add", "assignable_roles_delete", "delete_message", "emote_add", "claims_view", "claims_modify", "manage_class_add", "moderation_warn", "moderation_ban", "moderation_mute", "moderation_purge", "moderation_infraction_view" })
-                .HasPostgresEnum(null, "designated_channels", new[] { "message_log", "moderation_log", "startup_log", "user_join_log", "user_leave_log", "starboard", "server_join_log", "error_log", "bot_dm_log" })
+                .HasPostgresEnum(null, "designated_channels", new[] { "message_log", "moderation_log", "user_join_log", "user_leave_log", "starboard", "server_join_log", "bot_dm_log" })
                 .HasPostgresEnum(null, "infraction_type", new[] { "ban", "mute", "warn" })
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.5")
@@ -246,6 +246,9 @@ namespace ClemBot.Api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<bool>("Admin")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
@@ -305,10 +308,7 @@ namespace ClemBot.Api.Data.Migrations
                     b.Property<decimal>("ChannelId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal>("TagId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int?>("TagId1")
+                    b.Property<int>("TagId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
@@ -321,7 +321,7 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasIndex("ChannelId");
 
-                    b.HasIndex("TagId1");
+                    b.HasIndex("TagId");
 
                     b.HasIndex("UserId");
 
@@ -355,6 +355,21 @@ namespace ClemBot.Api.Data.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("GuildUser");
+                });
+
+            modelBuilder.Entity("RoleUser", b =>
+                {
+                    b.Property<decimal>("RolesId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("UsersId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("RolesId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("RoleUser");
                 });
 
             modelBuilder.Entity("ClemBot.Api.Data.Models.Channel", b =>
@@ -525,7 +540,9 @@ namespace ClemBot.Api.Data.Migrations
 
                     b.HasOne("ClemBot.Api.Data.Models.Tag", "Tag")
                         .WithMany("TagUses")
-                        .HasForeignKey("TagId1");
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ClemBot.Api.Data.Models.User", "User")
                         .WithMany()
@@ -545,6 +562,21 @@ namespace ClemBot.Api.Data.Migrations
                     b.HasOne("ClemBot.Api.Data.Models.Guild", null)
                         .WithMany()
                         .HasForeignKey("GuildsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ClemBot.Api.Data.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("RoleUser", b =>
+                {
+                    b.HasOne("ClemBot.Api.Data.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

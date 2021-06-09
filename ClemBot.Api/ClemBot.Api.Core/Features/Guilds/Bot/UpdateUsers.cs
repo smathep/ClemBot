@@ -28,7 +28,6 @@ namespace ClemBot.Api.Core.Features.Guilds.Bot
             public ulong Id { get; set; }
 
             public string? Name { get; set; }
-
         }
 
         public record Command : IRequest<Result<ulong, QueryStatus>>

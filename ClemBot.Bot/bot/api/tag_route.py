@@ -31,14 +31,20 @@ class TagRoute(BaseRoute):
             'GuildId': guild_id,
             'Name': name,
         }
-        return (await self._client.get('tags', data=json)).value
+        return await self._client.get('tags', data=json)
 
     async def get_tag_content(self, guild_id: int, name: str):
         json = {
             'GuildId': guild_id,
             'Name': name,
         }
-        return (await self._client.get('tags', data=json)).value['content']
+
+        resp = await self._client.get('tags', data=json)
+
+        if not resp:
+            return
+
+        return resp['content']
 
     async def delete_tag(self, guild_id: int, name: str, **kwargs):
         json = {

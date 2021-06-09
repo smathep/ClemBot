@@ -22,6 +22,8 @@ class GuildHandlingService(BaseService):
 
         await self.bot.guild_route.update_guild_users(guild.id, guild.members)
 
+        await self.bot.guild_route.update_guild_roles(guild.id, guild.roles)
+
         # The guild has been initialized, broadcast this to the rest
         # of the services
         await self.bot.messenger.publish(Events.on_new_guild_initialized, guild)
@@ -44,6 +46,8 @@ class GuildHandlingService(BaseService):
     @BaseService.Listener(Events.on_guild_leave)
     async def on_guild_leave(self, guild) -> None:
         log.info(f'Bot removed from {guild.name}: {guild.id}')
+
+        await self.bot.guild_route.leave_guild(guild.id)
 
         await self.bot.messenger.publish(Events.on_broadcast_designated_channel,
                                          OwnerDesignatedChannels.server_join_log,
