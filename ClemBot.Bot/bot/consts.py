@@ -40,6 +40,7 @@ class OwnerDesignatedChannels(DesignatedChannelBase):
 
 class GuildSettings(Enum):
     allow_embed_links = auto()
+    starboard_threshold = auto()
 
 
 class Claims(Enum):

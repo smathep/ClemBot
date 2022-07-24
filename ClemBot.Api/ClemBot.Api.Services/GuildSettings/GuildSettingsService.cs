@@ -30,6 +30,12 @@ public class GuildSettingsService : IGuildSettingsService
     public async Task<bool> SetCanEmbedLink(ulong guildId, bool val)
         => await SetPropertyAsync(ConfigSettings.allow_embed_links, guildId, val);
 
+    public async Task<int> GetStarboardThreshold(ulong guildId)
+        => await GetPropertyAsync<int>(ConfigSettings.starboard_threshold, guildId);
+
+    public async Task<bool> SetStarboardThreshold(ulong guildId, int val)
+        => await SetPropertyAsync(ConfigSettings.starboard_threshold, guildId, val);
+
     public async Task<Dictionary<ConfigSettings, object>> GetAllSettingsAsync(ulong guildId)
     {
         var values = new Dictionary<ConfigSettings, object>();

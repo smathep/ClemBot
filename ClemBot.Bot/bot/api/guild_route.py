@@ -148,4 +148,17 @@ class GuildRoute(BaseRoute):
     async def get_can_embed_link(self, guild_id: int):
         resp = await self._client.get(f'guildsettings/{guild_id}/{GuildSettings.allow_embed_links.name}')
         return resp['value']
+    
+    async def get_starboard_threshold(self, guild_id: int):
+        resp = await self._client.get(f'guildsettings/{guild_id}/{GuildSettings.starboard_threshold.name}')
+        if resp is None:
+            return None
+        return resp['value']
+
+    async def set_starboard_threshold(self, guild_id: int, threshold: int):
+        json = {
+            'Setting': GuildSettings.starboard_threshold.name,
+            'Value': threshold
+        }
+        return await self._client.post(f'guildsettings/{guild_id}/{GuildSettings.starboard_threshold.name}', data=json)
 

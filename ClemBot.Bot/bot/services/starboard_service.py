@@ -6,15 +6,17 @@ import uuid
 
 import discord
 
+from bot.clem_bot import ClemBot
 from bot.consts import Colors, DesignatedChannels, DiscordLimits
 from bot.messaging.events import Events
 from bot.services.base_service import BaseService
+import bot.bot_secrets as bot_secrets
 
 log = logging.getLogger(__name__)
 
 # minimum reactions required to get on the starboard
 # TODO: implement to where user-editable
-MIN_REACTIONS = 4
+DEFAULT_MIN_REACTIONS = 4
 
 # dictionary of rankings
 RANKINGS = {
@@ -41,23 +43,25 @@ class StarboardService(BaseService):
         self.curr_posts = {}
         self.call_back_ids = {}
 
+
     # function to check to see if a reaction is legal
-    def update_check(self, user: discord.User, reaction: discord.Reaction) -> bool:
+    async def update_check(self, user: discord.User, reaction: discord.Reaction) -> bool:
 
         # emote verification - stars only
         if str(reaction) != '⭐':
             return False
 
         # orignal poster reactions don't count
-        if reaction.message.author == user:
-            return False
+        # if reaction.message.author == user:
+        #     return False
 
         # bot messages don't count
         if reaction.message.author == self.bot.user:
             return False
 
+        min_reactions = await self.get_starboard_threshold(self.bot, message=reaction.message)
         # minimum reactions
-        if reaction.count < MIN_REACTIONS:
+        if reaction.count < DEFAULT_MIN_REACTIONS:
             return False
 
         return True
@@ -65,7 +69,7 @@ class StarboardService(BaseService):
     # message formatting function
     def make_star_post(self, message: discord.Message, stars: int) -> discord.Embed:
 
-        title = f'{RANKINGS.get(math.floor((stars - MIN_REACTIONS) / MIN_REACTIONS), 5)} | {stars} Star{"s" if stars > 1 else ""}'
+        title = f'{RANKINGS.get(math.floor((stars - DEFAULT_MIN_REACTIONS) / DEFAULT_MIN_REACTIONS), 5)} | {stars} Star{"s" if stars > 1 else ""}'
 
         embed = discord.Embed(
             title=title,
@@ -136,11 +140,29 @@ class StarboardService(BaseService):
     @BaseService.Listener(Events.on_reaction_add)
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User) -> None:
         # check to see if the message is worthy
-        if self.update_check(user, reaction):
+        if await self.update_check(user, reaction):
             if reaction.message.id not in self.curr_posts:
                 await self.add_to_starboard(user, reaction)
             else:
                 await self.updateStarboardEntry(user, reaction)
+    
+    async def get_starboard_threshold(self, message: discord.Message):
+        threshold = DEFAULT_MIN_REACTIONS
+
+        if not bot_secrets.secrets.bot_only:
+            try:
+                threshold = await self.bot.guild_route.get_starboard_threshold(message.guild.id)
+                # threshold = await self.bot.custom_starboard_threshold_route.get_custom_starboard_threshold(guild_id=message.guild.id, raise_on_error=True)
+            except Exception:
+                return DEFAULT_MIN_REACTIONS
+
+            if not threshold or threshold <= 0:
+                threshold = DEFAULT_MIN_REACTIONS
+            
+            # Log.info(f'Starboard threshold is {threshold}')
+            
+            return threshold
+
 
     def chunk_iterable(self, iterable, chunk_size):
         for i in range(0, len(iterable), chunk_size):

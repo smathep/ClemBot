@@ -8,7 +8,8 @@ public enum ConfigSettings
     /// Setting to specify if a server allows for the bot to
     /// automatically embed message links
     /// </summary>
-    allow_embed_links
+    allow_embed_links,
+    starboard_threshold
 }
 
 public static class GuildConfig
@@ -72,6 +73,7 @@ public static class GuildConfig
     public static readonly IReadOnlyDictionary<ConfigSettings, ConfigMetaData> TypeMappings
         = new Dictionary<ConfigSettings, ConfigMetaData>
     {
-        { ConfigSettings.allow_embed_links, new ConfigMetaData(typeof(bool), false) }
+        { ConfigSettings.allow_embed_links, new ConfigMetaData(typeof(bool), false) },
+        { ConfigSettings.starboard_threshold, new ConfigMetaData(typeof(int), null) }
     };
 }
